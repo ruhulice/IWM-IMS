@@ -1,0 +1,29 @@
+.menu-contain .height-unset {
+    height: unset;
+}
+
+.menu-contain .block-content {
+    padding: 20px 20px 20px;
+}
+
+.tab-height {
+    min-height: 274px;
+}
+
+.wizard-height {
+    height: 8px;
+}
+
+.progress-bar-width {
+    width: 30%;
+}
+
+.user-contain .select2-container {
+    width: 100% !important;
+}
+
+.menu-contain .fa {
+    font-size: 30px !important;
+    margin-right: 15px;
+    cursor: pointer;
+}

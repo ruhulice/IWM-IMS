@@ -1,0 +1,90 @@
+#toolbar .ol-select-rectangle button {
+    background-image: url(../res/SelectionSelectTool16.png);
+}
+#toolbar {
+    width: 39%;
+    background-color: #f6f7f9 !important;
+    display: inline-flex;
+    justify-content: flex-end;
+    position: fixed;
+    left: 60%;
+    margin-top: -33px;
+}
+#toolbar .ol-control{
+    position: relative !important;
+}
+
+#toolbar .ol-control button:focus, .ol-control button:hover {
+    text-decoration: none;
+    background-color: rgb(0 60 136);
+}
+
+#toolbar .ol-control i {
+    cursor: pointer;
+}
+
+.forprint{
+    z-index: 9999;
+    position: absolute;
+    width: 1200px;
+    height: 800px !important;
+    overflow: #ddd;
+    box-shadow: aliceblue;
+    box-shadow: 0px -20px 255px 255px rgba(0,0,0,0.99);
+    margin-left: 6%;
+    background-color: #fff;
+    top: 7%;
+}
+
+.forprint .ol-search, .forprint .ol-zoom, .forprint .ol-zoom-extent, .forprint .ol-search-type, .forprint .ol-legend{
+    display: none !important;
+}
+.forprint .ol-layers{
+    border: 3px solid;
+}
+#printControl{
+    display: none;
+    text-align: center;
+    padding: 5px;
+    border-radius: 20px;
+}
+.printControl{
+    position: absolute !important;
+    z-index: 99991 !important;
+    /* background-color: #fff; */
+    margin-left: 20% !important;
+    display: block !important;
+    top:2%;
+}
+
+#format{
+    min-width: 50px;
+}
+
+.select2-dropdown {
+    z-index: 99992;
+}
+
+.ol-control.ol-print {
+    top: 0px !important;
+    left: 0px !important;
+}
+
+.ol-ext-dialog {
+    position: fixed;
+    top: -100%;
+    left: 0;
+    width: 150%;
+    height: 100%;
+    opacity: 0;
+    background-color: rgba(0,0,0,.5);
+    z-index: 1033 !important;
+    pointer-events: none!important;
+    -webkit-transition: opacity .2s, top 0s .2s;
+    transition: opacity .2s, top 0s .2s;
+}
+.ol-scale-line {
+    right: 0;
+    left: auto;
+    bottom: 2em;
+}

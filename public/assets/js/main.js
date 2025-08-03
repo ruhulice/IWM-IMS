@@ -1,0 +1,3398 @@
+var finalEnlishToBanglaNumber={'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+$pltoInfo={};
+$ploatRanderd = false; 
+$allPlots=[];
+$allLanduse=[];
+String.prototype.getDigitBanglaFromEnglish = function() {
+    var retStr = this;
+    for (var x in finalEnlishToBanglaNumber) {
+         retStr = retStr.replace(new RegExp(x, 'g'), finalEnlishToBanglaNumber[x]);
+    }
+    return retStr;
+};
+
+(function($){
+	$.fn.serializeObject = function () {
+		"use strict";
+
+		var result = {};
+		var extend = function (i, element) {
+			var node = result[element.name];
+
+	// If node with same name exists already, need to convert it to an array as it
+	// is a multi-value field (i.e., checkboxes)
+
+			if ('undefined' !== typeof node && node !== null) {
+				if ($.isArray(node)) {
+					node.push(element.value);
+				} else {
+					result[element.name] = [node, element.value];
+				}
+			} else {
+				result[element.name] = element.value;
+			}
+		};
+
+		$.each(this.serializeArray(), extend);
+		return result;
+	};
+})(jQuery);
+  
+
+    $rivers=[];
+    var geojsonStr;
+    var pointLonlat;
+    let draw = null, snap=null, drawing = null, lastDrown= null, attributeWindowOpen= false, featureType='';
+
+      const geoServerBase = 'http://gis.land.gov.bd/geoserver/';
+      const geoServerBase2 = 'http://gis.land.gov.bd/geoserver/';
+      const gsWorkspace = 'wsIwmBase'; 
+  
+  
+      const mousePositionControl = new ol.control.MousePosition({
+        //coordinateFormat: createStringXY(4),
+        projection: 'EPSG:4326',
+        // comment the following two lines to have the mouse position
+        // be placed within the map.
+        className: 'custom-mouse-position',
+        target: document.getElementById('lblLatLon'),
+      });
+
+      var highlightedStyle = new ol.style.Style({
+        fill: new ol.style.Fill({
+            color: 'rgba(255, 255, 255, 0.0)',
+         }),
+        stroke:new ol.style.Stroke({
+           color: '#FF9F29',
+           width: 3,
+         }),
+       text: new ol.style.Text({
+         font: '12px Calibri,sans-serif',
+         fill: new ol.style.Fill({
+           color: '#FFFFFF'
+         }),
+         stroke: new ol.style.Stroke({
+            color: '#000000',
+            width: 5
+        }),
+       })
+     });
+
+
+
+       var scaleLineControl = new ol.control.ScaleLine();
+
+
+    var RangpurSatImg = new ol.layer.Tile({
+        title: 'Rangpur Sat Image',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_rangpur', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32645',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var PabnaSatImg = new ol.layer.Tile({
+        title: 'Pabna Sat Image',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_pabna', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:4326',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var MymensinghSatImg = new ol.layer.Tile({
+        title: 'Mymensingh Sat Image',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_mymensingh', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var SylhetSatImg = new ol.layer.Tile({
+        title: 'Sylhet Sat Image',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_sylhet', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var ManikganjSatImg = new ol.layer.Tile({
+        title: 'Manikganj Sat Image',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_manikganj', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var KhulnaSatImg = new ol.layer.Tile({
+        title: 'Khulna Sat Image',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_khulna', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32645',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var BarishalIndrakatiSatImg =    new ol.layer.Tile({
+        title: 'Barishal Indrakati Sat Image',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_barishal_indrakati', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:4326',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var CumillaSatImg =    new ol.layer.Tile({
+        title: 'Cumilla Sat Image',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_cumilla', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var AshuganjSat01Img = new ol.layer.Tile({
+        title: 'Ashuganj Sat Image 01',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_ashuganj_01', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var AshuganjSat02Img = new ol.layer.Tile({
+        title: 'Ashuganj Sat Image 02',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_ashuganj_02', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var KuliarcharSat01Img = new ol.layer.Tile({
+        title: 'Kuliarchar Sat Image 01',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_kuliarchar_01', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var KuliarcharSat02Img = new ol.layer.Tile({
+        title: 'Kuliarchar Sat Image 02',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_kuliarchar_02', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var TungiparaSatImg = new ol.layer.Tile({
+        title: 'Tungipara Sat Image',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_tungipara', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32645',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+
+    var AbhaynagarSat01Img = new ol.layer.Tile({
+        title: 'Abhaynagar Sat Image 01',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_abhaynagar_01', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32645',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var AbhaynagarSat02Img = new ol.layer.Tile({
+        title: 'Abhaynagar Sat Image 02',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_abhaynagar_02', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32645',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var AbhaynagarSat03Img = new ol.layer.Tile({
+        title: 'Abhaynagar Sat Image 03',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_abhaynagar_03', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32645',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var JaintapurSat01Img = new ol.layer.Tile({
+        title: 'Jaintapur Sat Image 01',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_jaintapur_01', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var JaintapurSat02Img = new ol.layer.Tile({
+        title: 'Jaintapur Sat Image 02',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_jaintapur_02', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var JaintapurSat03Img = new ol.layer.Tile({
+        title: 'Jaintapur Sat Image 03',
+        source: new ol.source.TileWMS({
+            url: geoServerBase2+'wms',
+            params: {'LAYERS':'wsDMMS:sat_jaintapur_03', 'TILED': true},
+            //projection: 'ESRI:102941',
+            projection: 'EPSG:32646',
+            serverType: 'geoserver',
+            transition: 0
+        })
+    });
+
+    var projection = new ol.proj.Projection({
+        code: 'EPSG:4326',
+        units: 'degrees',
+        axisOrientation: 'neu',
+        global: true
+    });
+    var format = 'image/png';
+
+    var SatImageGroup = new ol.layer.Group({
+        'title': 'Satellite Image',
+        layers: [
+            /*RangpurSatImg,
+            MymensinghSatImg,
+            SylhetSatImg,
+            KhulnaSatImg,
+            BarishalIndrakatiSatImg,
+            AshuganjSat01Img,
+            AshuganjSat02Img,*/
+            KuliarcharSat01Img,
+            KuliarcharSat02Img,
+            TungiparaSatImg,
+            /*CumillaSatImg,*/
+            ManikganjSatImg,
+            /*PabnaSatImg,
+            AbhaynagarSat01Img,
+            AbhaynagarSat02Img,
+            AbhaynagarSat03Img,
+            JaintapurSat01Img,
+            JaintapurSat02Img,
+            JaintapurSat03Img*/
+        ]
+    });
+
+
+
+    // Cached Sat Image
+
+    
+
+var gridsetName = 'EPSG:4326';
+var gridNames = ['EPSG:4326:0', 'EPSG:4326:1', 'EPSG:4326:2', 'EPSG:4326:3', 'EPSG:4326:4', 'EPSG:4326:5', 'EPSG:4326:6', 'EPSG:4326:7', 'EPSG:4326:8', 'EPSG:4326:9', 'EPSG:4326:10', 'EPSG:4326:11', 'EPSG:4326:12', 'EPSG:4326:13', 'EPSG:4326:14', 'EPSG:4326:15', 'EPSG:4326:16', 'EPSG:4326:17', 'EPSG:4326:18', 'EPSG:4326:19', 'EPSG:4326:20', 'EPSG:4326:21'];
+var baseUrl = geoServerBase2+'gwc/service/wmts';
+var style = '';
+var format = 'image/png';
+var infoFormat = 'text/html';
+var layerName = 'wsDMMS:sat_image_bd';
+var projection = new ol.proj.Projection({
+code: 'EPSG:4326',
+units: 'degrees',
+axisOrientation: 'neu'
+});
+var resolutions = [0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125, 0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125, 0.001373291015625, 6.866455078125E-4, 3.4332275390625E-4, 1.71661376953125E-4, 8.58306884765625E-5, 4.291534423828125E-5, 2.1457672119140625E-5, 1.0728836059570312E-5, 5.364418029785156E-6, 2.682209014892578E-6, 1.341104507446289E-6, 6.705522537231445E-7, 3.3527612686157227E-7];
+baseParams = ['VERSION','LAYER','STYLE','TILEMATRIX','TILEMATRIXSET','SERVICE','FORMAT'];
+
+params = {
+  'VERSION': '1.0.0',
+  'LAYER': layerName,
+  'STYLE': style,
+  'TILEMATRIX': gridNames,
+  'TILEMATRIXSET': gridsetName,
+  'SERVICE': 'WMTS',
+  'FORMAT': format
+};
+
+var SatImg = new ol.layer.Tile({
+  source: new ol.source.TileWMS({
+    url: geoServerBase2+'/wsDMMS/wms',
+    params: {'FORMAT': format, 
+             'VERSION': '1.1.1',
+             tiled: true,
+          "STYLES": '',
+          "LAYERS": 'wsDMMS:sat_image_bd',
+          "exceptions": 'application/vnd.ogc.se_inimage',
+       tilesOrigin: 89.252922485894 + "," + 22.6965509162032
+    }
+  }),//constructSource(),
+  title: 'Satellite Image',
+  visible:false
+});
+
+      var layerGroupBase = new ol.layer.Group({
+          'title': 'Base maps',
+          layers: [
+          new ol.layer.Tile({
+              title: 'Open Street Map',
+            //   type: 'base',
+              visible: false,
+              source: new ol.source.OSM()
+          }),
+          new ol.layer.Tile({
+              title: 'Satellite Image 2',
+              //type: 'base',
+              visible: false,
+              source: new ol.source.XYZ({
+            //   attributions: ['Powered by Esri',
+            //       'Source: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community'
+            //   ],
+              attributionsCollapsible: false,
+              url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+              maxZoom: 23
+              })
+          }),
+          //SatImg
+          SatImageGroup
+          ]
+      });
+  
+  
+      var internationalBoundary =    new ol.layer.Tile({
+          title: 'Int. Boundary',
+          source: new ol.source.TileWMS({
+          url: geoServerBase + gsWorkspace + '/wms',
+          params: {'LAYERS': 'wsIwmBase:gis_boundary_international', 'TILED': true},
+          serverType: 'geoserver',
+          visible:false,
+          transition: 0,
+          }),
+      });
+
+
+      var divisionBoundary =    new ol.layer.Tile({
+        title: 'Divisoin Boundary',
+        visible: true,
+        source: new ol.source.TileWMS({
+        url: geoServerBase+'wms',
+        //params: {'LAYERS': 'wsBARC:division_barc', 'TILED': true},
+        params: {'LAYERS': 'wsDMMS:gis_boundary_division', 'TILED': true},
+        projection: 'EPSG:4326',
+        serverType: 'geoserver',
+        transition: 0,
+        }),
+    });
+
+
+    var districtBoundary =    new ol.layer.Tile({
+        title: 'District Boundary',
+        visible: false,
+        source: new ol.source.TileWMS({
+        url: geoServerBase+'wms',
+        //params: {'LAYERS': 'wsBase:district_boundary_wgs', 'TILED': true},
+        params: {'LAYERS': 'wsDMMS:gis_boundary_district', 'TILED': true},
+        projection: 'EPSG:4326',
+        serverType: 'geoserver',
+        transition: 0,
+        }),
+    });
+
+
+  
+      var upazilaBoundary =    new ol.layer.Tile({
+          title: 'Upazila Boundary',
+          visible: false,  
+          source: new ol.source.TileWMS({
+          url: geoServerBase+'wms',
+          //params: {'LAYERS': 'wsIwmBase:gis_boundary_upazila', 'TILED': true},
+          params: {'LAYERS': 'wsDMMS:gis_boundary_upazila', 'TILED': true},
+          projection: 'EPSG:4326',
+          serverType: 'geoserver',
+          transition: 0,
+          }),
+      });
+
+
+      var unionBoundary =    new ol.layer.Tile({
+        title: 'Union Boundary',
+        visible: false,
+
+        source: new ol.source.TileWMS({
+        url: geoServerBase+'wms',
+        params: {'LAYERS': 'wsIwmBase:gis_boundary_union', 'TILED': true},
+        projection: 'EPSG:4326',
+        serverType: 'geoserver',
+        transition: 0,
+        }),
+    });
+
+
+    var mauzaBoundary =    new ol.layer.Tile({
+        title: 'Mauza Boundary',
+        visible: false,
+
+        source: new ol.source.TileWMS({
+        url: geoServerBase+'wms',
+        params: {'LAYERS': 'wsIwmBase:gis_boundary_mauza', 'TILED': true},
+        projection: 'EPSG:4326',
+        serverType: 'geoserver',
+        transition: 0,
+        }),
+    });
+  
+  
+  
+      var layerGroupBoundary = new ol.layer.Group({
+          'title': 'Administrative',
+          //layers: [mauzaBoundary,unionBoundary,upazilaBoundary,districtBoundary,divisionBoundary,internationalBoundary]
+          layers: [divisionBoundary,districtBoundary,upazilaBoundary] //unionBoundary,mauzaBoundary
+      });
+  
+  
+      var scanMap =    new ol.layer.Tile({
+          visible:false,
+          title: 'Scan Map',
+          source: new ol.source.TileWMS({
+          url: geoServerBase+'wms',
+          params: {'LAYERS':'wsDMMS:MouzaMapWGSRE', 'TILED': true},          
+          serverType: 'geoserver',
+          transition: 0,
+          }),
+      });
+
+
+    var plotLayer =    new ol.layer.Tile({
+        title: 'Plot Boundary',
+        source: new ol.source.TileWMS({
+        url: geoServerBase2+'wms',
+        //params: {'LAYERS':'	wsDMMS:dha_dha_sin_098_000_rs_mg_new', 'TILED': true},
+        params: {'LAYERS':'wsDMMS:mouza', 'TILED': true},
+        //projection: 'ESRI:102941',
+        projection: 'EPSG:4326',
+        serverType: 'geoserver',
+        transition: 0,
+        }),
+    });
+  
+    var plotLanduseLayer =    new ol.layer.Tile({
+        title: 'Land Use',
+        visible:false,
+        source: new ol.source.TileWMS({
+        url: geoServerBase2+'wms',
+        //params: {'LAYERS':'wsDMMS:dha_dha_sin_098_000_rs_ml_updated_new', 'TILED': true},
+        //params: {'LAYERS':'wsDMMS:Landuse', 'TILED': true},
+        params: {'LAYERS':'wsDMMS:BaseProjectLayer', 'TILED': true},
+        //projection: 'ESRI:102941',
+        projection: 'EPSG:4326',
+        serverType: 'geoserver',
+        transition: 0
+        })
+    });
+
+
+
+    const wmsSource = new ol.source.ImageWMS({
+        url: geoServerBase2+'wms',
+        //params: {'LAYERS': 'dha_dha_sin_098_000_rs_ml_updated_new'},
+        params: {'LAYERS': 'wsDMMS:dha_gop_ml'},
+        ratio: 1,
+        serverType: 'geoserver',
+    });
+    
+    const wmsSource_en = new ol.source.ImageWMS({
+        url: geoServerBase2+'wms',
+        //params: {'LAYERS': 'dha_dha_sin_098_000_rs_ml_updated_new'},
+        params: {'LAYERS': 'wsDMMS:bar_bak_ml_en'},
+        ratio: 1,
+        serverType: 'geoserver',
+    });
+      
+
+      const source = new ol.source.Vector();
+      const vector = new ol.layer.Vector({
+        source: source,
+        title: 'Vector Layer',
+        style: new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: 'rgba(255, 255, 255, 0.0)',
+          }),
+          stroke: new ol.style.Stroke({
+            color: '#ffcc33',
+            width: 2,
+          }),
+          image: new ol.style.Circle({
+            radius: 7,
+            fill: new ol.style.Fill({
+              color: '#ffcc33',
+            }),
+          }),
+        }),
+      });
+  
+  
+      var layerGroupData = new ol.layer.Group({
+          'title': 'Data layer',
+          layers: [scanMap] //plotLanduseLayer,plotLayer
+          //layers: [vector,plotLanduseLayer,plotLayer]
+          });
+  
+      var zoom = document.createElement('span');
+     // zoom.innerHTML = '<img src="https://icons.iconarchive.com/icons/mazenl77/I-like-buttons-3a/512/Cute-Ball-Go-icon.png" width="100%" height="100%">';
+
+      var map = new ol.Map({
+          controls: ol.control.defaults.defaults().extend([mousePositionControl]),
+          target: 'map',
+          layers: [layerGroupBase, layerGroupBoundary], //plotLanduseLayer
+          view: new ol.View({
+              center: ol.proj.fromLonLat([90.3783589, 23.6954955]),
+              zoom: 7.3,
+          })
+      });
+
+      var attributionControl = new ol.control.CanvasAttribution();
+      map.addControl(attributionControl);
+      attributionControl.setCanvas(true);
+
+      var bm = new ol.control.GeoBookmark({	
+        marks: {
+        }
+      });
+      map.addControl(bm);
+
+          // Coordinate control
+    var positionControl = new ol.control.CenterPosition({
+        canvas: true,
+        coordinateFormat: function(coord) {
+          return ol.coordinate.toStringHDMS(coord);
+        },
+        projection: 'EPSG:4326'
+      });
+      map.addControl(positionControl);
+
+
+      var note = new ol.control.Notification();
+      map.addControl(note)
+
+
+    // Add a tooltip
+    var tooltip = new ol.Overlay.Tooltip();
+    map.addOverlay(tooltip);
+
+
+       // Main control bar
+    var mainbar = new ol.control.Bar();
+    map.addControl(mainbar);
+
+    /* Nested toobar with one control activated at once */
+    var nested = new ol.control.Bar ({ toggleOne: true, group:false });
+    mainbar.addControl (nested);
+    // Add selection tool (a toggle control with a select interaction)
+    var selectCtrl = new ol.control.Toggle({
+      html: '<i class="fa fa-hand-pointer-o"></i>',
+      className: "select",
+      title: "Select",
+      interaction: new ol.interaction.Select (),
+      active:true,
+      onToggle: function(active) {
+        //$("#info").text("Select is "+(active?"activated":"deactivated"));
+        note.show('<i class="fa fa-info-circle"></i> '+"Select tool "+(active?"activated":"deactivated"));
+      }
+    });
+    nested.addControl(selectCtrl);
+
+    // Add measuring  polygon tool (a toggle control with a select interaction)
+    var drawPoly = new ol.interaction.Draw({ type: 'Polygon' });
+    var measurePloyCtrl = new ol.control.Toggle({
+        html: '<i class="fa fa-bookmark-o fa-rotate-270"></i>',
+        className: "polygon",
+        title: "Area measuring tool",
+        interaction: drawPoly,
+        active:false,
+        onToggle: function(active) {
+            //$("#info").text("Select is "+(active?"activated":"deactivated"));
+            note.show('<i class="fa fa-info-circle"></i> '+"Area measuring tool "+(active?"activated":"deactivated"));
+        }
+    });
+    nested.addControl(measurePloyCtrl);
+
+    // Add measuring  polygon tool (a toggle control with a select interaction)
+    var drawLine = new ol.interaction.Draw({ type: 'LineString' });
+    var measurePloyCtrl = new ol.control.Toggle({
+        html: '<i class="fa fa-share-alt"></i>',
+        className: "linestring",
+        title: "Distance measuring tool",
+        interaction:drawLine,
+        active:false,
+        onToggle: function(active) {
+           // $("#info").text("Select is "+(active?"activated":"deactivated"));
+           note.show('<i class="fa fa-info-circle"></i> '+"Distance measuring tool "+(active?"activated":"deactivated"));
+        }
+    });
+    nested.addControl(measurePloyCtrl);
+
+    var deleteCtrl = new ol.control.Button({
+        html: '<i class="fa fa-times"></i>',
+        title: "Delete",
+        handleClick: function() {
+
+            globalLayer.getSource().clear();
+            note.show('<i class="fa fa-info-circle"></i>  Drown features removed');
+        }
+      });
+      nested.addControl(deleteCtrl);
+
+    /* Standard Controls */
+    //mainbar.addControl (new ol.control.ZoomToExtent({  extent: [ 265971,6243397 , 273148,6250665 ] }));
+    mainbar.addControl (new ol.control.Rotate());
+    mainbar.addControl (new ol.control.FullScreen());
+
+      // Set feature on drawstart
+  drawLine.on('drawstart', tooltip.setFeature.bind(tooltip));
+  // Remove feature on finish
+  drawLine.on(['change:active','drawend'], tooltip.removeFeature.bind(tooltip));
+
+  // Set feature on drawstart
+  drawPoly.on('drawstart', tooltip.setFeature.bind(tooltip));
+  // Remove feature on finish
+  drawPoly.on(['change:active','drawend'], tooltip.removeFeature.bind(tooltip));
+   
+
+
+      map.addControl(new ol.control.CanvasAttribution({ canvas: true }));
+      map.addControl(new ol.control.CanvasTitle({ 
+        title: '', 
+        visible: false,
+        style: new ol.style.Style({ text: new ol.style.Text({ font: '20px "Lucida Grande",Verdana,Geneva,Lucida,Arial,Helvetica,sans-serif'}) })
+      }));
+  
+      ///*-----------------------legend control ----------------*//
+
+     // Define a new legend
+    var legend = new ol.legend.Legend({ 
+        // title: 'Legend',
+        // margin: 5,
+        // maxWidth: 500
+    });
+    var legendCtrl = new ol.control.Legend({
+        legend: legend,
+        collapsed: true
+    });
+    map.addControl(legendCtrl);
+
+    legend.addItem(new ol.legend.Image({
+        //title: 'Legend',
+       //src: 'http://geoservices.brgm.fr/geologie?language=fre&version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=GEOSERVICES_GEOLOGIE&format=image/png&STYLE=default'
+       //src :graphicUrl
+       src : '/assets/media/legends/landuse.png'
+   }))
+
+
+    // Initial legend
+    
+    function updateLegend(){
+        var lang = $('#lang_selector').val();
+        legend.removeItemAt(0)
+        var graphicUrl = "";
+    
+        if(lang == 'english'){
+           // graphicUrl = wmsSource_en.getLegendUrl(resolution)+'&legend_options=fontSize:15;fontAntiAliasing:true;fontColor:0x000033;dpi:120';
+            legend.addItem(new ol.legend.Image({
+                // title: 'Legend',
+                // src :graphicUrl
+                src : '/assets/media/legends/landuse_en.png'
+            }))
+        }
+        else{
+            //graphicUrl = wmsSource.getLegendUrl(resolution)+'&legend_options=fontSize:15;fontAntiAliasing:true;fontColor:0x000033;dpi:120';
+            legend.addItem(new ol.legend.Image({
+                // title: 'মানচিত্র সূচক',
+                // src :graphicUrl
+                src : '/assets/media/legends/landuse.png'
+            }))
+        }
+    }
+
+
+    var resolution = map.getView().getResolution();
+    //console.log(resolution);
+    const graphicUrl = wmsSource.getLegendUrl(resolution)+'&legend_options=fontSize:15;fontAntiAliasing:true;fontColor:0x000033;dpi:120';
+
+
+
+  //----------------------- end of legend control ------------//
+
+
+  //-----------scale line control----------------- //
+  map.addControl(new ol.control.CanvasScaleLine());
+  //----------end of scale line ------------------//
+
+
+// Print control
+var printControl = new ol.control.PrintDialog({ lang: 'en' });
+printControl.setSize('A4');
+map.addControl(printControl);
+
+/* On print > save image file */
+printControl.on(['print', 'error'], function(e) {
+  // Print success
+  if (e.image) {
+    if (e.pdf) {
+      // Export pdf using the print info
+      var pdf = new jsPDF({
+        orientation: e.print.orientation,
+        unit: e.print.unit,
+        format: e.print.size
+      });
+      pdf.addImage(e.image, 'JPEG', e.print.position[0], e.print.position[0], e.print.imageWidth, e.print.imageHeight);
+      pdf.save(e.print.legend ? 'legend.pdf' : 'map.pdf');
+    } else  {
+      // Save image as file
+
+      e.canvas.toBlob(function(blob) {
+        var name = (e.print.legend ? 'legend.' : 'map.')+e.imageType.replace('image/','');
+        saveAs(blob, name);
+      }, e.imageType, e.quality);
+    }
+  } else {
+    console.warn('No canvas to export');
+  }
+});
+
+  //----------------- end of print control ------------//
+
+
+
+
+      /*----------- Search control -------------*/
+ // Set the search control 
+ var search = new ol.control.SearchNominatim({
+    lan: 'en',
+    polygon: true,
+    point:true,
+    reverse: true,
+    position: true
+  });
+  map.addControl (search);
+
+  // Select feature when click on the reference index
+  search.on('select', function(e) {
+    // console.log(e);
+    globalLayer.getSource().clear();
+    // Check if we get a geojson to describe the search
+    if (e.search.geojson) {
+      var format = new ol.format.GeoJSON();
+      var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });
+      f.setStyle(highlightedStyle);
+      globalLayer.getSource().addFeature(f);
+      var view = map.getView();
+      var resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), map.getSize());
+      var zoom = view.getZoomForResolution(resolution);
+      var center = ol.extent.getCenter(f.getGeometry().getExtent());
+      // redraw before zoom
+      setTimeout(function(){
+        view.animate({
+        center: center,
+        zoom: Math.min (zoom, 16)
+      });
+      }, 100);
+    } else {
+      map.getView().animate({
+        center:e.coordinate,
+        zoom: Math.max (map.getView().getZoom(),16)
+      });
+    }
+  });
+
+
+
+  /// Feature search control
+
+  var select = new ol.interaction.Select({
+    style: function(feature){
+        //console.log(feature);
+        var label= feature.C.plot;
+        var selectedPlotStyle = new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(255, 255, 255, 0.0)',
+            }),
+            stroke:new ol.style.Stroke({
+            color: '#58bcff',
+            width: 5,
+            }),
+        text: new ol.style.Text({
+            font: '15px Calibri,sans-serif',
+            fill: new ol.style.Fill({
+            color: '#000000'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#FFFFFF',
+                width: 3
+            }),
+        })
+        });
+        //console.log(label);
+        selectedPlotStyle.getText().setText(label);
+      feature.setStyle(selectedPlotStyle);
+      globalLayer.getSource().addFeature(feature);
+    }
+  });
+  map.addInteraction(select);
+
+
+var search = new ol.control.Search(
+  {	
+      getTitle: function(f) { return f.name; },
+      autocomplete: function (s, cback)
+      {	
+          $abc=[];
+
+          var cqlFilter = "label iLIKE '%"+s+"%'";
+          var encodedFilter = encodeURIComponent(cqlFilter);
+
+          //$url = geoServerBase+$parts[0]+'/ows?service=WFS&version=1.0.0&request=GetFeature&typeName='+$selectedLayer+'&maxFeatures=50&outputFormat=application%2Fjson';
+          //$url = geoServerBase+'wsDMMS/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=dha_dha_sin_098_000_rs_mg_new&CQL_FILTER=plot_no_en like'+s+'&maxFeatures=50&outputFormat=application/json';
+          $url = geoServerBase+'wsDMMS/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=global_search&CQL_FILTER='+encodedFilter+'&maxFeatures=50&outputFormat=application/json';
+           $.ajax({
+              url:$url,
+              type:"get",
+              dataType: 'json',
+              async: false,
+              cache: false,
+              success: function(data){
+                   data.features.forEach(item => {
+                      if(item.properties.hasOwnProperty('features')){
+                          item.properties.features.forEach(item => {
+                            $props =  item.properties;
+                            item.name = $props.label+'<i>'+$props.origin+'</i>';
+                            //item.name = 'প্লট - '+$props['plot_no_bn']+', থানাঃ '+$props['m_thana_bn']+', জেলাঃ '+$props['m_dist_bn']+', বিভাগঃ '+$props['m_dist_bn'];
+                            $abc.push(item);
+
+                            //   $.each( item.properties, function( key, value ) {
+                            //       if(typeof(value)=='string'){
+                            //           if(value.toString().toLowerCase().includes(s.toLowerCase())){
+                            //               item.name = key+' - '+value;
+                            //               $abc.push(item);
+                            //           }
+                            //       }
+                            //   });                               
+                          });
+                      }
+                      else{  
+                        $props =  item.properties;
+                        item.name = $props.label+'<i>'+$props.origin+'</i>';
+                        //item.name = 'প্লট - '+$props['plot_no_bn']+'<i> থানাঃ '+$props['m_thana_bn']+', জেলাঃ '+$props['m_dist_bn']+', বিভাগঃ '+$props['m_dist_bn']+'</i>';   
+                        $abc.push(item);
+                        //   $.each( item.properties, function( key, value ) {
+                        //       if(typeof(value)=='string'){
+                        //           if(value.toString().toLowerCase().includes(s.toLowerCase())){
+                        //               //item.name = value;
+                        //               item.name = key+' - '+value;
+                        //               $abc.push(item);
+                        //           }
+                        //       }
+                             
+                        //   });                        
+                      }
+                  });
+
+                  //console.log($abc);
+                  cback($abc); 
+              }
+            });
+      }
+  });
+map.addControl (search);
+search.on('select', function(e)
+{	
+   // var label = e.search.properties.label;
+  if(e.search.hasOwnProperty('geometry')){
+      if(e.search.geometry.type != 'Point'){
+
+          var res = e.search.geometry.coordinates[0][0];
+          //console.log(res);
+          var data = 'MULTILINESTRING((';
+          for(var i =0; i< res.length; i++){
+              if(i==0){
+                  data+=res[i][0] + ' '+res[i][1];
+              }
+                  else{
+                      data+=','+res[i][0] + ' '+res[i][1];
+                  }
+              };
+              data+='))';
+            //   console.log(data);
+              var formatWKT = new ol.format.WKT();
+                          globalLayer.getSource().clear();
+                          //console.log(e.search.geomatry);
+                          if (formatWKT.readFeatures(data)[0]) {
+                              formatWKT.readFeatures(data, {
+                                  dataProjection: 'EPSG:4326',
+                                  featureProjection: 'EPSG:3857'
+                              }).forEach(function (d) {
+                                //globalLayer.getFeatures().push(d);
+                                //highlightedStyle
+                                //highlightedStyle.getText().setText(label);
+                                d.setStyle(highlightedStyle);
+                                globalLayer.getSource().addFeature(d);
+                                  //iwm.globalLayer.getSource().addFeature(d);
+                              });
+                          }
+                          //console.log(map)
+                          //
+                          toggleHighlightedLayer();
+
+                          var extent = ol.extent.buffer(globalLayer.getSource().getFeatures()[0].getGeometry().getExtent(), 200);
+                      // var view = map.getView();
+                          //console.log(selectInteraction);
+                         // map.getView().fit(extent,  map.getSize(),{ duration: 1500});
+                          map.getView().fit(extent,{ duration: 1500});
+      }
+      else{
+          var res = e.search.geometry.coordinates;
+          var data = 'MULTILINESTRING(('+res[0]+' '+res[1]+'))';
+          var formatWKT = new ol.format.WKT();
+                          //selectInteraction.getFeatures().clear();
+                          globalLayer.getSource().clear();
+                          //console.log(e.search.geomatry);
+                          if (formatWKT.readFeatures(data)[0]) {
+                              formatWKT.readFeatures(data, {
+                                  dataProjection: 'EPSG:4326',
+                                  featureProjection: 'EPSG:3857'
+                              }).forEach(function (d) {
+                                  //selectInteraction.getFeatures().push(d);
+                                  //highlightedStyle.getText().setText(label);
+                                  d.setStyle(highlightedStyle);
+                                  globalLayer.getSource().addFeature(d);
+                              });
+                          }
+                          //console.log(map)
+                          toggleHighlightedLayer();
+                          //
+                          var extent = ol.extent.buffer(globalLayer.getSource().getFeatures()[0].getGeometry().getExtent(), 200);
+                         // map.getView().fit(extent,  map.getSize(),{ duration: 1500});
+                          map.getView().fit(extent,{ duration: 1500});
+      }
+  }
+  else{
+      var Coord = ol.proj.transform([e.search.longitude,e.search.latitude], 'EPSG:4326', 'EPSG:3857');
+      map.getView().animate({
+          center: Coord,
+          zoom: 12,
+          easing: ol.easing.easeOut,
+          duration:3000
+      })
+  }
+ 
+});
+
+
+
+function toggleHighlightedLayer(){
+    $($($('[title=" Highlighted Layer"]')[0]).siblings('[type=checkbox]')[0]).prop("checked", false);
+    $($($('[title=" Highlighted Layer"]')[0]).siblings('[type=checkbox]')[0]).trigger('click');
+}
+
+    // end fo feature search
+
+  addGlobeButton();
+  function addGlobeButton(){
+    $('.ol-search:not(".nominatim")').before("<div class='ol-control ol-search-type'><button id='searchType' title='Enable global search' style='float:right;'><i class='fa fa-globe'></i></button></div>");
+    //$('.ol-search button[title=Search]').before("<button id='searchType' style='float:right;'><i class='fa fa-globe'></i></button>");
+
+     $('.ol-search:not(".nominatim")').find('button').each(function(){
+        $(this).toggleClass('hidden');
+     });
+     
+    // $('#searchType').on('change',function(){
+    //     //alert('working');
+    //     $('.ol-search:not(".nominatim")').find('button').toggleClass('hidden');
+    //     $('.nominatim').find('button').toggleClass('hidden');
+    // });
+
+
+    $('#searchType').on('click',function(){
+        $(this).toggleClass('selected');
+        $('.ol-search:not(".nominatim")').find('button').toggleClass('hidden');
+        $('.nominatim').find('button').toggleClass('hidden');
+    });
+
+    $('#searchType').trigger('click');
+    $('#searchType').toggleClass('selected');
+    //$(".ol-revers").addClass('remove-revarse');
+    // $(".ol-revers").html('<button style="float:right;"><i class="fa fa-globe"></i></button>');
+    // $(".remove-revarse").removeClass('ol-revers');
+  }
+      
+      /*-----------End---------*/
+
+
+      /* Map Drwaing interaciton part */
+      const modify = new ol.interaction.Modify({source: source});
+      map.addInteraction(modify);
+
+      updateLegend();
+
+      /* map resize rerander map */
+
+      function updateMapSize(){
+        //alert('w');
+        setTimeout(function(){
+            map.updateSize();
+        },100);
+        
+    };
+
+      function addAttibute(){
+          if(featureType == 'line'){
+            addAttibuteToDrawnLine();
+          }
+          else if(featureType =='point'){
+            addAttibuteToDrawnPoint();
+          }
+      }
+
+      function saveKhalInfo(){
+          var khalName = $('#name').val();
+          var riverId = $('#outfall_river_id').val();
+          var pollution_record_id = $('#pollution_record_id').val();
+          if(khalName == null || khalName == ''){
+              toastr.warning('দয়া করে খালের নাম প্রবেশ করুন');
+          }
+          else if(riverId == null || riverId == ''){
+            toastr.warning('দয়া করে নদী নির্বাচন করুন');
+          }
+          else{
+             $.ajax({
+                  url: '/saveKhalInfo',
+                  type: 'POST',
+                  data: {
+                      "_token": $('#token').val(),
+                     "Data":geojsonStr,
+                     "name":khalName,
+                     "outfall_river_id":riverId,
+                     "pollution_record_id":pollution_record_id
+                  },
+                  success: function (data) {
+                      if(data.Status){
+                        toastr.success("তথ্য সফলভাবে সংরক্ষিত হয়েছে");
+                        clearInteractions();
+                      }
+                      else{
+                          toastr.error('তথ্য সংরক্ষণ করা যায়নি');
+                      }
+                  }
+              });
+          }
+      }
+
+
+      function clearInteractions(){
+          $('.ui-dialog-titlebar-close').trigger('click');
+            if (lastDrown) {
+                source.removeFeature(lastDrown);
+            }
+            map.removeInteraction(snap);
+            snap = null;
+            map.removeInteraction(draw);
+            draw = null;
+            drawing = null;
+            lastDrown = null;
+            featureType= '';
+
+            if(snap != null){
+                $('.line-attr').removeClass('hidden');
+            }
+            else{
+                $('.line-attr').addClass('hidden');
+            }            
+      }
+
+      function addPointDrawingInteractions(){
+        drawing = true;
+        featureType='point';
+        if(draw != null){
+            removeDrawingInteraction();
+            return;
+        }
+    
+        draw = new ol.interaction.Draw({
+          source: source,
+          type: 'Point',
+        });
+        map.addInteraction(draw);
+        snap = new ol.interaction.Snap({source: source});
+        map.addInteraction(snap);
+      
+        draw.on('drawend', function (event) {
+          lastDrown = event.feature;
+          pointLonlat = ol.proj.transform(event.feature.A.geometry.flatCoordinates, 'EPSG:3857', 'EPSG:4326');
+          drawing = null;
+
+          addAttibuteToDrawnPoint();     
+        });
+      }
+      
+    function addLineDrawingInteractions() {
+        drawing = true;
+        featureType='line';
+        if(draw != null){
+            removeDrawingInteraction();
+            return;
+        }
+
+        draw = new ol.interaction.Draw({
+        source: source,
+        type: 'LineString',
+        });
+        map.addInteraction(draw);
+        snap = new ol.interaction.Snap({source: source});
+        map.addInteraction(snap);
+    
+        draw.on('drawend', function (event) {
+            lastDrown = event.feature;
+        var features = vector.getSource().getFeatures();
+        features = features.concat(lastDrown);
+        var writer = new ol.format.GeoJSON();
+        geojsonStr = writer.writeFeatures(features);
+        drawing = null;
+        addAttibuteToDrawnLine();     
+        });
+  }
+
+  
+
+
+  $divName='';
+  $distName='';
+  $upzName='';
+  $uniName='';
+  $mouzaName='';
+
+
+  function updateLocationBC(){
+    var inputDiv = $('#Div');
+    var inputDist = $('#Dist');
+    var inputThana = $('#Upz');
+    var inputUni = $('#Uni');
+    var inputMouza = $('#Mouza');
+    var inputSheet = $('#Sheet');
+    var inputPlot = $('#Plot');
+
+    
+    var text  = '';
+    $divName = $( "#Div option:selected" ).text();
+    if(inputDiv.val() != null){
+        text +='<span class="breadcrumb-item">বিভাগঃ '+$divName+'</span>';
+    }
+    $distName = $( "#Dist option:selected" ).text();
+    if(inputDist.val() != null){
+        text +='<span class="breadcrumb-item">জেলাঃ'+$distName+'</span>';
+    }
+    $upzName = $( "#Upz option:selected" ).text();
+    if(inputThana.val() != null){
+        text +='<span class="breadcrumb-item">উপজেলাঃ '+$upzName+'</span>';
+    }
+    $uniName = $( "#Uni option:selected" ).text();
+    if(inputUni.val() != null){
+        text +='<span class="breadcrumb-item">ইউনিয়নঃ '+$uniName+'</span>';
+    }
+    $mouzaName = $( "#Mouza option:selected" ).text();
+    if(inputMouza.val() != null){
+        text +='<span class="breadcrumb-item">মৌজাঃ '+$mouzaName+'</span>';
+    }
+    $('#geoLocationBC').html(text);
+  }
+
+
+  function pupulateCascadedropdowns(){
+
+    var formatWKT = new ol.format.WKT();
+
+    var inputDiv = $('#Div');
+    var inputDist = $('#Dist');
+    var inputThana = $('#Upz');
+    var inputUni = $('#Uni');
+    var inputMouza = $('#Mouza');
+    var inputSheet = $('#Sheet');
+    var inputPlot = $('#Plot');
+    blockUI();
+    $.ajax({
+        url: '/getAdminByCode',
+        type: 'POST',
+        data: {
+            level: 'forDiv',
+            column: 'division_n',
+            "_token": $('#token').val()
+        },
+        
+        success: function (data) {
+            unblockUI();
+            inputDiv.html('');
+            inputDiv.append('<option selected disabled hidden value="">নির্বাচন করুন</option>');
+            data.forEach(function (d) {
+                var opt = $("<option></option>").attr("value", d.code).text(d.name_bn);
+                inputDiv.append(opt);
+            });
+            if(typeof($locationInfo) != 'undefined' && $locationInfo != null){
+                $(inputDiv).val($locationInfo.divCode).trigger('change'); 
+            }
+
+          
+        },
+        error:function(){
+            unblockUI();
+        }
+    });
+
+    var myStyle = new ol.style.Style({
+        // fill: new ol.style.Fill({
+        //    color: 'rgba(255, 255, 255, 0.4)',
+        //  }),
+        stroke:new ol.style.Stroke({
+           //color: '#088dcf7d',
+           color: '#e67300',
+           width: 1,
+         }),
+       text: new ol.style.Text({
+         font: '12px Calibri,sans-serif',
+         fill: new ol.style.Fill({
+           color: '#FFFFFF'
+         }),
+         stroke: new ol.style.Stroke({
+            color: '#000000',
+            width: 5
+        }),
+       })
+     });
+
+
+  
+    //------District----------------
+    $('#Div').change(function (evt) {
+        // console.log('dfa');
+        inputDist.html('');
+        inputThana.html('');
+        inputUni.html('');
+        inputMouza.html('');
+        inputSheet.html('');
+        inputPlot.html('');
+
+        updateLocationBC();
+        blockUI();
+        $.ajax({
+            url: '/getAdminByCode',
+            type: 'POST',
+            data: {
+                level: 'forDist',
+                'division_code': inputDiv.val(),
+                "_token": $('#token').val()
+            },
+            success: function (dataDist) {
+                unblockUI();
+                inputDist.append('<option selected disabled hidden value="">নির্বাচন করুন</option>');
+                dataDist.forEach(function (dist) {
+                    var optdist = $("<option></option>").attr("value", dist.code).text(dist.name_bn);
+                    inputDist.append(optdist);
+  
+                });
+                if(typeof($locationInfo) != 'undefined' && $locationInfo != null){
+                    $(inputDist).val($locationInfo.distCode).trigger('change');
+                }
+            },
+            error:function(){
+                unblockUI();
+            }
+        });
+
+        
+        blockUI();
+        $.ajax({
+            type: 'POST',
+            url: '/getGeomByCode',
+            data: {
+                level: 'forDiv',
+                tableName: 'gis_boundary_division',
+                divVal: inputDiv.val(),
+                "_token": $('#token').val()
+            },
+            success: function (data) {
+                unblockUI();
+                var label = data.label;
+                data = data.geom;
+                globalLayer.getSource().clear();
+                if (formatWKT.readFeatures(data)) {                        
+                    formatWKT.readFeatures(data, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:3857'
+                    }).forEach(function (ft) {
+                        
+                         highlightedStyle.getText().setText(label);
+                         ft.setStyle(highlightedStyle);
+                        globalLayer.getSource().addFeature(ft);
+                    });
+                }
+                var extent = ol.extent.buffer(globalLayer.getSource().getFeatures()[0].getGeometry().getExtent(), 40000);
+                //map.getView().fit(extent, map.getSize());
+
+                map.getView().fit(extent, {duration:1000});
+
+            },
+            error:function(){
+                unblockUI();
+            }
+        });
+    });
+    //---------District----------------
+  
+    //---------thana----------------
+    $('#Dist').change(function (evt) {
+        inputThana.html('');
+        inputUni.html('');
+        inputMouza.html('');
+        inputSheet.html('');
+        inputPlot.html('');
+        updateLocationBC();
+        blockUI();
+        $.ajax({
+            url: '/getAdminByCode',
+            type: 'POST',
+            data: {
+                level: 'forThana',
+                'division_code': inputDiv.val(),
+                'district_code': inputDist.val(),
+                "_token": $('#token').val()
+            },
+            success: function (dataThana) {
+                unblockUI();
+              inputThana.append('<option selected disabled hidden value="">নির্বাচন করুন</option>');
+                dataThana.forEach(function (thana) {
+                    var opt = $("<option></option>").attr("value", thana.code).text(thana.name_bn);
+                    inputThana.append(opt);
+                });
+  
+                if(typeof($locationInfo) != 'undefined' && $locationInfo != null){
+                    $(inputThana).val($locationInfo.upzCode).trigger('change');
+                }
+            },
+            error:function(){
+                unblockUI();
+            }
+        });
+
+        blockUI();
+        $.ajax({
+            type: 'POST',
+            url: '/getGeomByCode',
+            data: {
+                level: 'forDist',
+                tableName: 'gis_boundary_district',
+                divVal: inputDiv.val(),
+                distVal: inputDist.val(),
+                "_token": $('#token').val()
+            },
+            success: function (data) {
+                unblockUI();
+                var label = data.label;
+                data = data.geom;               
+                globalLayer.getSource().clear();
+                // console.log(data);
+                if (formatWKT.readFeatures(data)) {                        
+                    formatWKT.readFeatures(data, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:3857'
+                    }).forEach(function (ft) {
+                         
+                        highlightedStyle.getText().setText(label);
+                         ft.setStyle(highlightedStyle);
+                        globalLayer.getSource().addFeature(ft);
+                    });
+                }
+                var extent = ol.extent.buffer(globalLayer.getSource().getFeatures()[0].getGeometry().getExtent(), 30000);
+                //map.getView().fit(extent, map.getSize());
+                map.getView().fit(extent,{duration:1000});
+            },
+            error:function(){
+                unblockUI();
+            }
+        });
+
+    });
+  
+  
+    $('#Upz').change(function (evt) {
+        inputMouza.html('');
+        inputSheet.html('');
+        inputPlot.html('');
+        updateLocationBC();
+        blockUI();
+        $.ajax({
+            url: '/getAdminByCode',
+            type: 'POST',
+            data: {
+                /*level: 'forUnion',*/
+                level: 'forMauza',
+                'division_code': inputDiv.val(),
+                'district_code': inputDist.val(),
+                'thana_code': inputThana.val(),
+                "_token": $('#token').val()
+            },
+            success: function (dataMouza) {
+                unblockUI();
+                inputMouza.append('<option selected disabled hidden value="">নির্বাচন করুন</option>');
+                dataMouza.forEach(function (item) {
+                    //console.log(item);
+                    var opt = $("<option></option>").attr("value", item.code).attr("m_code", item.m_code).text(item.name_bn);
+                    inputMouza.append(opt);
+                });
+                if(typeof($locationInfo) != 'undefined' && $locationInfo != null){
+                    $(inputMouza).val($locationInfo.uniCode).trigger('change');
+                }
+
+            },
+            error:function(){
+                unblockUI();
+            }
+        });
+
+        blockUI();
+        $.ajax({
+            type: 'POST',
+            url: '/getGeomByCode',
+            data: {
+                level: 'forThana',
+                tableName: 'gis_boundary_upazila',
+                thanaVal: inputThana.val(),
+                "_token": $('#token').val()
+            },
+            success: function (data) {
+                unblockUI();
+                var label = data.label;
+                data = data.geom;
+                globalLayer.getSource().clear();
+                if (formatWKT.readFeatures(data)) {                        
+                    formatWKT.readFeatures(data, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:3857'
+                    }).forEach(function (ft) {
+                        highlightedStyle.getText().setText(label);
+                         ft.setStyle(highlightedStyle);
+                        globalLayer.getSource().addFeature(ft);
+                    });
+                }
+                var extent = ol.extent.buffer(globalLayer.getSource().getFeatures()[0].getGeometry().getExtent(), 20000);
+                //map.getView().fit(extent, map.getSize());
+                map.getView().fit(extent,{duration:1000});
+
+            },
+            error:function(){
+                unblockUI();
+            }
+        });
+    });
+
+      var tblVal = '';
+
+      $('#Mouza').change(function (evt) {
+        inputSheet.html('');
+        inputPlot.html('');
+        updateLocationBC();
+       
+        // map.getView().setCenter([10041956.745791607, 2727228.768143575]);
+        // map.getView().setZoom(15.25);
+        updateLegend();
+        blockUI();
+        //$($("label:contains('Satellite (Esri)')").siblings()[0]).trigger('click');
+        var m_code = $('#Mouza option:selected').attr('m_code');
+        var valCheck = '';
+
+        globalLayer.getSource().clear();
+        landuseVectorLayer.getSource().clear();
+        plotVectorLayer.getSource().clear();
+        $.ajax({
+            type: 'POST',
+            url: '/getGeomByCode',
+            data: {
+                level: 'forMauza',
+                tableName: m_code.toLowerCase(),
+                mauzaVal: inputMouza.val(),
+                "_token": $('#token').val(),
+                plotOrLanduse:'plot'
+            },
+            success: function (data) {
+              unblockUI();
+                //console.log(data);
+              //   globalLayer.getSource().clear();
+              //   landuseVectorLayer.getSource().clear();
+              //   plotVectorLayer.getSource().clear();
+
+                inputSheet.append('<option selected value="">সকল সিট</option>');
+                inputPlot.append('<option selected disabled hidden value="">নির্বাচন করুন</option>');
+
+                var sheetData = data.sheets;
+                var plotData = data.plots;
+                $allPlots = plotData;
+               // $landuse = data.landuse;
+
+              for(var i=0; i<sheetData.length; i++){
+                  var label = sheetData[i].sht_label;
+                  var opt = $("<option></option>").attr("value", sheetData[i].sht_no_en).text(label);
+                  if(sheetData[i].sht_no_en !== valCheck) {
+                      inputSheet.append(opt);
+                      valCheck = sheetData[i].sht_no_en;
+                  }
+              }
+
+              for(var i=0; i<plotData.length; i++){
+                  var label = plotData[i].label;
+                    var opt = $("<option></option>").attr("value", plotData[i].gid).text(label);
+                    inputPlot.append(opt);
+                    var mcode  = plotData[i].m_code;
+                    var jl  = plotData[i].jl_no_en;
+                    var sht =  plotData[i].sht_no_en;
+                    var dt = plotData[i].geom;
+                    var plot = plotData[i].plot_no_en;
+                    if (formatWKT.readFeatures(dt)) {
+                      formatWKT.readFeatures(dt, {
+                          dataProjection: 'EPSG:4326',
+                          featureProjection: 'EPSG:3857'
+                      }).forEach(function (ft) {
+                          ft.set('m_code',mcode);
+                          ft.set('plot',label);
+                          ft.set('plotEn',plot);
+                          ft.set('jl',jl);
+                          ft.set('sht',sht);
+                            var plotBoundaryStyle = new ol.style.Style({
+                                fill: new ol.style.Fill({
+                                    color: 'rgba(255, 255, 255, 0.0)',
+                                }),
+                                stroke:new ol.style.Stroke({
+                                color: '#FF9F29',
+                                width: 1,
+                                }),
+                            text: new ol.style.Text({
+                                font: '15px Calibri,sans-serif',
+                                fill: new ol.style.Fill({
+                                color: '#000000'
+                                }),
+                                stroke: new ol.style.Stroke({
+                                    color: '#FFFFFF',
+                                    width: 3
+                                }),
+                            })
+                            });
+
+                          plotBoundaryStyle.getText().setText(label);
+                          ft.setStyle(plotBoundaryStyle);
+                          plotVectorLayer.getSource().addFeature(ft);
+                      });
+                  }
+              }
+
+              var extent = ol.extent.buffer(plotVectorLayer.getSource().getFeatures()[0].getGeometry().getExtent(), 3000);
+              map.getView().fit(extent,{duration:1000});
+            
+          },
+          error:function(){
+              unblockUI();
+          }
+        });
+
+
+
+        $.ajax({
+          type: 'POST',
+          url: '/getGeomByCode',
+          data: {
+              level: 'forMauza',
+              tableName: m_code.toLowerCase(),
+              mauzaVal: inputMouza.val(),
+              "_token": $('#token').val(),
+              plotOrLanduse:'landuse'
+          },
+          success: function (data) {              
+          $landuse = data.landuse;
+          $allLanduse = $landuse;
+            for(var i=0; i<$landuse.length; i++){
+                //console.log($landuse);
+                  var plot_land_use = $landuse[i].maj_class;
+                  var dt = $landuse[i].geom;
+                  if (formatWKT.readFeatures(dt)) {
+                      formatWKT.readFeatures(dt, {
+                          dataProjection: 'EPSG:4326',
+                          featureProjection: 'EPSG:3857'
+                      }).forEach(function (ft) {
+                            var landUseStyle = new ol.style.Style({
+                                fill: new ol.style.Fill({
+                                    color: getLandUse(plot_land_use),
+                                })
+                            })
+                            
+                          ft.setStyle(landUseStyle);
+                          landuseVectorLayer.getSource().addFeature(ft);
+                      });
+                  }
+              }
+
+          //   var extent = ol.extent.buffer(plotVectorLayer.getSource().getFeatures()[0].getGeometry().getExtent(), 3000);
+          //   map.getView().fit(extent,{duration:1000});
+          
+        },
+        error:function(){
+            unblockUI();
+        }
+      });
+
+    });
+
+
+
+    $('#Sheet').change(function (evt) {
+        inputPlot.html('');
+        updateLocationBC();
+        globalLayer.getSource().clear();
+        updateLegend();
+        blockUI();
+        globalLayer.getSource().clear();
+        plotVectorLayer.getSource().clear();
+        landuseVectorLayer.getSource().clear();
+        var m_code = $('#Mouza option:selected').attr('m_code');
+        $.ajax({
+            type: 'POST',
+            url: '/getGeomByCode',
+            data: {
+                level: 'forSheet',
+                tableName: m_code.toLowerCase(),
+                mauzaVal: inputMouza.val(),
+                sheetVal: inputSheet.val(),
+                plotOrLanduse:'plot',
+                "_token": $('#token').val()
+            },
+            success: function (data) {
+                unblockUI();
+                $landuse = data.landuse;
+                $plots = data.plots;
+                $allPlots = $plots;
+                inputPlot.append('<option selected disabled hidden value="">নির্বাচন করুন</option>');
+                for(var i=0; i<$plots.length; i++){
+                  //console.log($plots[i]);
+                    var label = $plots[i].label;
+                    var mcode  = $plots[i].m_code;
+                    var jl = $plots[i].jl_no_en;
+                    var sht =  $plots[i].sht_no_en;
+                    var dt = $plots[i].geom;
+                    var plot = $plots[i].plot_no_en;
+                    var opt = $("<option></option>").attr("value", $plots[i].gid).text(label);
+
+                    inputPlot.append(opt);
+
+                    if (formatWKT.readFeatures(dt)) {
+                        formatWKT.readFeatures(dt, {
+                            dataProjection: 'EPSG:4326',
+                            featureProjection: 'EPSG:3857'
+                        }).forEach(function (ft) {
+                            ft.set('m_code',mcode);
+                            ft.set('plot',label);
+                            ft.set('plotEn',plot);
+                            ft.set('jl',jl);
+                            ft.set('sht',sht);
+                              var plotBoundaryStyle = new ol.style.Style({
+                                  fill: new ol.style.Fill({
+                                      color: 'rgba(255, 255, 255, 0.0)',
+                                  }),
+                                  stroke:new ol.style.Stroke({
+                                  color: '#FF9F29',
+                                  width: 1,
+                                  }),
+                              text: new ol.style.Text({
+                                  font: '15px Calibri,sans-serif',
+                                  fill: new ol.style.Fill({
+                                  color: '#000000'
+                                  }),
+                                  stroke: new ol.style.Stroke({
+                                      color: '#FFFFFF',
+                                      width: 3
+                                  }),
+                              })
+                              });
+
+                            plotBoundaryStyle.getText().setText(label);
+                            ft.setStyle(plotBoundaryStyle);
+                            plotVectorLayer.getSource().addFeature(ft);
+                        });
+                    }
+                }
+
+                var extent = ol.extent.buffer(plotVectorLayer.getSource().getFeatures()[0].getGeometry().getExtent(), 2000);
+                map.getView().fit(extent,{duration:1000});
+              },
+              error:function(){
+                  unblockUI();
+              }
+        });
+
+        $.ajax({
+          type: 'POST',
+          url: '/getGeomByCode',
+          data: {
+              level: 'forSheet',
+              tableName: m_code.toLowerCase(),
+              mauzaVal: inputMouza.val(),
+              sheetVal: inputSheet.val(),
+              plotOrLanduse:'landuse',
+              "_token": $('#token').val()
+          },
+          success: function (data) {
+              $landuse = data.landuse;
+              $allLanduse = $landuse;
+              for(var i=0; i<$landuse.length; i++){
+                //console.log($landuse[i]);
+                  var label = $landuse[i].label;
+                  var mcode  = $landuse[i].m_code;
+                  var plot_land_use = $landuse[i].maj_class;
+                  var dt = $landuse[i].geom;
+                  if (formatWKT.readFeatures(dt)) {
+                      formatWKT.readFeatures(dt, {
+                          dataProjection: 'EPSG:4326',
+                          featureProjection: 'EPSG:3857'
+                      }).forEach(function (ft) {
+                          ft.set('m_code',mcode);
+                          var luc = getLandUse(plot_land_use);
+                            var landUseStyle = new ol.style.Style({
+                                fill: new ol.style.Fill({
+                                    color: luc,
+                                })
+                            })
+                            
+                          ft.setStyle(landUseStyle);
+                          landuseVectorLayer.getSource().addFeature(ft);
+                      });
+                  }
+              }
+
+            },
+            error:function(){
+            }
+      });
+    });
+
+
+    $('#Plot').change(function (evt) {
+        updateLocationBC();
+        
+        var m_code = $('#Mouza option:selected').attr('m_code');
+        blockUI();
+        
+        $.ajax({
+            type: 'POST',
+            url: '/getGeomByCode',
+            data: {
+                level: 'forPlot',
+                tableName: m_code.toLowerCase(),
+                mauzaVal: inputMouza.val(),
+                plotVal: inputPlot.val(),
+                plotOrLanduse:'plot',
+                "_token": $('#token').val()
+            },
+            success: function (data) {
+              unblockUI();
+              globalLayer.getSource().clear();
+        
+              var plot_single = data.plot;
+              var plots = data.plots;
+
+              for(var i=0; i<plot_single.length; i++){
+                  var label = plot_single[i].label;
+                  var dt = plot_single[i].geom;
+                  if (formatWKT.readFeatures(dt)) {
+                      formatWKT.readFeatures(dt, {
+                          dataProjection: 'EPSG:4326',
+                          featureProjection: 'EPSG:3857'
+                      }).forEach(function (ft) {
+                          var selectedPlotStyle = new ol.style.Style({
+                              fill: new ol.style.Fill({
+                                  color: 'rgba(255, 255, 255, 0.0)',
+                              }),
+                              stroke:new ol.style.Stroke({
+                              color: '#58bcff',
+                              width: 5,
+                              }),
+                          text: new ol.style.Text({
+                              font: '15px Calibri,sans-serif',
+                              fill: new ol.style.Fill({
+                              color: '#000000'
+                              }),
+                              stroke: new ol.style.Stroke({
+                                  color: '#FFFFFF',
+                                  width: 3
+                              }),
+                          })
+                          });
+
+                          selectedPlotStyle.getText().setText(label);
+                          ft.setStyle(selectedPlotStyle);
+                          globalLayer.getSource().addFeature(ft);
+                      });
+                      var extent = ol.extent.buffer(globalLayer.getSource().getFeatures()[0].getGeometry().getExtent(), 200);
+                      map.getView().fit(extent,{duration:1000});
+                  }
+              }
+          },
+          error:function(){
+              unblockUI();
+          }
+        });
+
+    });
+  
+  }
+
+
+  
+/* End of drwaing interaction */
+
+
+
+
+      var zoomToExtentControl = new ol.control.ZoomToExtent({
+        extent: [9802861.639, 2326387.771, 10338532.333, 3060183.243],
+      });
+      map.addControl(zoomToExtentControl);
+
+
+
+    var vectorSource = new ol.source.Vector({
+        features: []
+    });
+
+    var plotSource =  new ol.source.Vector({
+        features: []
+    });
+
+    var landUseSource =  new ol.source.Vector({
+        features: []
+    });
+
+    var vectorSourceHighlight = new ol.source.Vector({
+        features: []
+    });
+
+    var globalLayer = new ol.layer.Vector({
+        source: vectorSource,
+        title:' Highlighted Layer'
+    });
+
+    var plotVectorLayer = new ol.layer.Vector({
+        source: plotSource,
+        title:'Plot Boundary'
+    });
+
+    var landuseVectorLayer = new ol.layer.Vector({
+        source: landUseSource,
+        title:'Land Use',
+        visible:false
+    });
+
+    //landuseVectorLayer.setOpacity(0.8);
+
+    map.addLayer(landuseVectorLayer);
+    map.addLayer(plotVectorLayer);    
+    map.addLayer(globalLayer);
+
+    // var highlightedLayer = new ol.layer.Vector({
+    //     source: vectorSourceHighlight,
+    //     title:' Highlighted Layer'
+    // });
+    // map.addLayer(highlightedLayer);
+  
+      var layerSwitcher = new ol.control.LayerSwitcher({
+          activationMode: 'click',
+          //startActive: true,
+          tipLabel: 'Layers', // Optional label for button
+          groupSelectStyle: 'children', // Can be 'children' [default], 'group' or 'none'
+          collapseTipLabel: 'Collapse layers',
+      });
+     map.addControl(layerSwitcher);
+
+  
+  
+      //map.addLayer(connectionPoint);
+  
+      //var connectionPointJsonLink = "http://geo.iwmbd.com:8080/geoserver/wsBase/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=wsBase%3Agov_circuithouse&maxFeatures=50&outputFormat=application%2Fjson";
+      //var connectionPointVectorSource = new ol.source.Vector({
+      //    url: connectionPointJsonLink,
+      //    format: new ol.format.GeoJSON()
+      //});
+          
+  
+      /**
+      * Elements that make up the popup.
+      */
+      const container = document.getElementById('popup');
+      const content = document.getElementById('popup-content');
+      const closer = document.getElementById('popup-closer');
+  
+  
+  
+      /**
+      * Create an overlay to anchor the popup to the map.
+      */
+      const overlay = new ol.Overlay({
+      element: container,
+      positioning: 'center-center',
+    //   autoPan: {
+    //       animation: {
+    //       duration: 250,
+    //       },
+    //   },
+    autoPan: true,
+    autoPanAnimation: {
+    duration: 250
+    }
+      });
+
+  
+      /**
+      * Add a click handler to hide the popup.
+      * @return {boolean} Don't follow the href.
+      */
+      closer.onclick = function () {
+      overlay.setPosition(undefined);
+      closer.blur();
+      return false;
+      };
+  
+      map.addOverlay(overlay);
+
+
+
+
+      function showOwnerInfo(OwnerName,Khatian,Share){
+
+        //$ownerInfo = JSON.parse(jsonst);
+
+        $landSizeShare = parseFloat($khatianValue * Share).toFixed(2).getDigitBanglaFromEnglish();
+        $("#modalUI").dialog({
+            modal: true,
+            autoOpen: false,
+            collapseEnabled: true,
+            title: "",
+            width: 1000,
+            //height: 300,
+            show: {
+              effect: "blind",
+              duration: 300
+            },
+            hide: {
+              effect: "clip",
+              duration: 200
+            } 
+          }).dialog("open");
+    
+          $html = `<div class="card" style="    width: 100%;
+          text-align: center;
+          padding-bottom: 2px;">
+          <img src="/assets/media/nid_.png" class="card-img-top" alt="NID Card" style="border: 5px solid #ddd;">
+          </div><hr/>`;
+
+          $html += `
+          <style>
+    .dotted_botton {
+    border-bottom: 1px dotted #000;
+    background-color: #fff;
+}
+table{
+    font-size: 13px !important;
+}
+#tblCollection{
+    border-spacing: 0;
+    border-collapse: collapse;
+    width: 100%;
+}
+#tblCollection td, #tblCollection th, #tblCollection tr{
+   border: 1px solid #ddd;
+
+}
+.qr_code{
+    margin-top:-100px;
+}
+p {
+    margin-top: 0;
+    margin-bottom: 0.5rem !important;
+}
+
+hr {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    border: 0;
+    border-top: 1px solid #e4e7ed;
+}
+</style>
+<div>
+    <div class="portlet-body">
+        <div style="font-family: 'kalpurush',Arial,sans-serif;font-size: 13px !important;line-height: 1.2;color: #333;background-color: #fff;" class="printDiv" id="mydiv">
+            <div>
+                <div>
+                    <div>বাংলাদেশ ফরম নং ১০৭৭</div>
+                    <div style="margin-left: 40px;">(সংশোধিত)</div>
+                </div>
+                <div align="right" style="margin-top: -30px">
+                    (পরিশিষ্ট: ৩৮)                        <br>
+                    <span class="input_bangla">ক্রমিক নং 261622002844</span>
+                </div>
+            </div>
+            <br>
+            <div align="center">
+                <div>ভূমি উন্নয়ন কর পরিশোধ রসিদ</div>
+                <div>(অনুচ্ছেদ ৩৯২ দ্রষ্টব্য)</div>
+            </div>
+            <br>
+            <table width="100%">
+                <tbody><tr>
+                    <td>সিটি কর্পোরেশন /পৌর /ইউনিয়ন ভূমি অফিসের নাম  </td>
+                    <td class="dotted_botton" width="75%">রামচন্দ্রপুর ভূমি অফিস</td>
+                </tr>
+            </tbody></table>
+            <table style="margin-top:5px;" width="100%">
+                <tbody><tr>
+                    <td>মৌজার ও জে. এল. নং:</td>
+                    <td class="dotted_botton" width="50%" style="padding-left: 10px;">১</td>
+                    <td>উপজেলা / থানা  </td>
+                    <td width="30%" class="dotted_botton" style="padding-left: 10px;">`+$upzName+`</td>
+                </tr>
+            </tbody></table>
+
+            <table style="margin-top:5px;" width="100%">
+                <tbody><tr>
+                    <td>জেলা:</td>
+                    <td class="dotted_botton" width="35%" style="padding-left: 10px;">`+$distName+`</td>
+                    <td>মালিকের নাম </td>
+                    <td width="50%" class="dotted_botton" style="padding-left: 10px;">
+                    `+OwnerName+`                        </td>
+                </tr>
+            </tbody></table>
+
+            <table style="margin-top:5px;" width="100%">
+                <tbody><tr>
+                    <td>২ নং রেজিস্টার অনুযায়ী হোল্ডিং নম্বার</td>
+                    <td class="dotted_botton numeric_bangla" width="80%" style="padding-left: 10px;">
+                        164/11                        </td>
+                </tr>
+            </tbody></table>
+
+            <table style="margin-top:5px;" width="100%">
+                <tbody><tr>
+                    <td>জমির শ্রেণী</td>
+                    <td width="93%" class="dotted_botton" style="padding-left: 10px;">
+                        `+$landUse+`</td>
+                </tr>
+                <tr>
+                    <td>খতিয়ান নং</td>
+                    <td width="90%" class="dotted_botton" style="padding-left: 10px;">
+                        `+Khatian.getDigitBanglaFromEnglish()+`                        </td>
+                </tr>
+            </tbody></table>
+
+            <table style="margin-top:5px;" width="100%">
+                <tbody><tr>
+                    <td width="5%">দাগ নং</td>
+                    <td width="93%" class="dotted_botton" style="padding-left: 10px;">
+                       `+$plotNo+`                      </td>
+                </tr>
+                <tr>
+                    <td width="10%">জমির পরিমাণ (শতক)</td>
+                    <td width="93%" class="dotted_botton" style="padding-left: 10px;">
+                    `+ $landSizeShare+`                        </td>
+                </tr>
+            </tbody></table>
+
+            <br>
+            <br>
+            <table id="tblCollection">
+                <tbody><tr>
+                    <th style="text-align: center;" colspan="8">আদায়ের বিবরণ </th>
+                </tr>
+                <tr>
+                    <th style="text-align: center;">তিন বৎসরের ঊর্ধ্বের বকেয়া</th>
+                    <th style="text-align: center;">গত তিন বৎসরের বকেয়া
+                    </th>
+                    <th style="text-align: center;">বকেয়ার সুদ ও ক্ষতিপূরণ
+                    </th>
+                    <th style="text-align: center;">হাল দাবি
+                    </th>
+                    <th style="text-align: center;">মোট দাবি</th>
+                    <th style="text-align: center;">মোট আদায়
+                    </th>
+                    <th style="text-align: center;">মোট বকেয়া</th>
+                    <th style="text-align: center;">মন্তব্য</th>
+                </tr>
+
+                    <tr>
+                        <!-- <td align="center" class="numeric_bangla"></td> -->
+                        <td align="center">০</td>
+                        <td align="center">০</td>
+                        <td align="center">০</td>
+                        <td align="center">১২০</td>
+                        <td align="center">
+                            ১২০</td>
+                        <td align="center">১২০</td>
+                        <td align="center">
+                            ০
+                        </td>
+                        <td align="center"></td>
+
+                    </tr>
+            </tbody></table>
+            <div class="row">
+                <div class="col-md-12">
+                    <p class="dotted_botton"> সর্বমোট (কথায়):
+                                                    এক শত বিশ টাকা মাত্র ।
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <p style="margin: 0 !important;">
+                        নোট: সর্বশেষ কর পরিশোধের সাল - ১৪২৯                        </p>
+                </div>
+            </div>
+            <div>
+                <div align="left">
+                    <p class="input_bangla">চালান নং : 2122-0005039909</p>
+                    <p>
+                        তারিখ : </p><div style="margin-top: -32px;margin-left: 10px;"><p style="width: 93px;padding: 0;margin: 0;margin-left: 38px;margin-bottom: 2px;">২৩ বৈশাখ ১৪২৯</p><span style="border-top:1px solid;margin-left:36px;">০৬ মে, ২০২২</span><p></p></div>
+
+                </div>
+                <div class="qr_code" align="center">
+                    <img src="/assets/media/qr.png" width="100" height="100">
+                </div>
+                <div style=" float: right; text-align: right;font-size: 12px;font-family: 'kalpurush',Arial,sans-serif; margin-top:-80px;">
+                        <p class="text-center" style="padding: 5px; ">এই দাখিলা ইলেক্ট্রনিকভাবে তৈরি করা হয়েছে, <br> কোন স্বাক্ষর প্রয়োজন নেই।</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+                `;
+
+    
+        $('#modalUI').html($html);
+        $('.ui-dialog-title').html('Owner Information: Dummy');
+    
+      }
+
+
+      $ownerInfo = null;
+      function changeTab(id,e){
+        $('.nav-link').removeClass('active');
+        // $('.tab-pane').removeClass('show active');
+        // $(id).addClass('show active');
+        $(e).addClass('active');
+
+        var id = id.replace('#','');
+        var dhtml = `<table class="table table-bordered table-stripped"><tbody><tr><th>মালিকের নাম</th><th>অংশ</th><th>জমির পরিমাণ</th></tr>`;
+        $.ajax({
+            url: '/assets/js/khatian.js',
+            type: 'GET',
+            success: function (data) {
+                var data = JSON.parse(data);
+                data = data.filter((item)=>item.Khatian == id);
+                data.forEach(element => {
+                    // console.log(element);
+                    var shareArea = parseFloat(element.Share * $khatianValue).toFixed(2);
+                    //$ownerInfo = element;
+                    var st = JSON.stringify(JSON.stringify(element));
+                    dhtml +=`<tr><td><a href="#" role="button" onclick="showOwnerInfo(\'`+element.OwnerName+`\',\'`+element.Khatian+`\',`+element.Share+`)">`+element.OwnerName+`</a></td><td>`+element.Share.getDigitBanglaFromEnglish()+`</td><td>`+shareArea.getDigitBanglaFromEnglish()+`  শতক</td></tr>`;
+                });
+
+                dhtml+=`</tbody></table>`;  
+
+                var html='';
+                html += `
+                <h6 style="margin-bottom:10px;color:#ff9900;margin-top:5px;">খাতিয়ান `+id.getDigitBanglaFromEnglish()+`   মালিকানা তথ্যঃ         &nbsp;&nbsp; <span style="color:red">`+$khatianValue.getDigitBanglaFromEnglish()+` শতক</span><button type="button" title="Print khatian" onclick="printKhatian(`+id+`)" class="btn btn-outline-primary" style="float:right; margin-top:-5px;"><i class="fa fa-print"></i></button></h6>
+                <div class="col-md-12" style="padding:0px; min-height:50px; margin-bottom:10px;">`+dhtml+`</div>`;
+                $('#khatianDetails').html(html);
+            }
+        });
+        
+      }
+
+      function isEmpty(value) {
+        return typeof value == 'string' && !value.trim() || typeof value == 'undefined' || value === null;
+      }
+
+      function showInfo(lang,e){
+        $('.nav-link').removeClass('active');
+        $(e).addClass('active');
+        var html='';
+        if(lang =='en'){
+            html ='<table class="table table-bordered table-stripped"><tbody>';
+            html +='<tr><td>Project Name</td><td>Mouza and Plot Based National Digital Land Zoning Project</td></tr>';
+            html +='<tr><td>Mouza Code</td><td>'+$pltoInfo.m_code+'</td></tr>';
+            html +='<tr><td>Division Name</td><td>'+$pltoInfo.m_div_en+'</td></tr>';
+            html +='<tr><td>District Name</td><td>'+$pltoInfo.m_dist_en+'</td></tr>';
+            html +='<tr><td>Thana/Upazila Name</td><td>'+$pltoInfo.m_thana_en+'</td></tr>';
+            html +='<tr><td>Mouza Name</td><td>'+$pltoInfo.m_name_en+'</td></tr>';
+            html +='<tr><td>JL Number </td><td>'+$pltoInfo.jl_no_en+'</td></tr>';
+            html +='<tr><td>Sheet Number</td><td>'+$pltoInfo.sht_no_en+'</td></tr>';
+            html +='<tr><td>Layer ID</td><td>'+$pltoInfo.l_code_en+'</td></tr>';
+            html +='<tr><td>Layer Name</td><td>'+$pltoInfo.l_name_en+'</td></tr>';
+            html +='<tr><td>Plot/Dag Number</td><td>'+$pltoInfo.plot_no_en+'</td></tr>';
+            html +='<tr><td>Mouza Map Type</td><td>'+$pltoInfo.sv_type_en+'</td></tr>';
+            html +='<tr><td>Origian Scale of the Mouza</td><td>'+$pltoInfo.scale_en+'</td></tr>';
+            html +='<tr><td>Survey Year</td><td>'+$pltoInfo.sv_year_en+'</td></tr>';
+            html +='<tr><td>Revenue Survey Number</td><td>'+$pltoInfo.rev_no_en+'</td></tr>';
+            html +='<tr><td>Geocode Number</td><td>'+$pltoInfo.geocode_en+'</td></tr>';
+            //html +='<tr><td>Major Class</td><td>'+$pltoInfo.majorclass+'</td></tr>';
+            html +='<tr><td>Major Class</td><td>'+$pltoInfo.maj_class+'</td></tr>';
+            //html +='<tr><td>Sub Class</td><td>'+$pltoInfo.subclass+'</td></tr>';
+            html +='<tr><td>Sub Class</td><td>'+$pltoInfo.sub_class+'</td></tr>';
+            html +='<tr><td>Remarks</td><td>'+(isEmpty($pltoInfo.remarks) === true ? '' : $pltoInfo.remarks)+'</td></tr>';
+        }
+        else{
+            html ='<table class="table table-bordered table-stripped"><tbody>';
+            html +='<tr><td>প্রকল্পের নাম</td><td>মৌজা ও প্লট ভিত্তিক জাতীয় ডিজিটাল ভূমি জোনিং প্রকল্প</td></tr>';
+            html +='<tr><td>মৌজা কোড</td><td>'+$pltoInfo.m_code+'</td></tr>';
+            html +='<tr><td>বিভাগের নাম</td><td>'+$pltoInfo.m_div_bn+'</td></tr>';
+            html +='<tr><td>জেলার নাম</td><td>'+$pltoInfo.m_dist_bn+'</td></tr>';
+            html +='<tr><td>থানা/উপজেলার নাম</td><td>'+$pltoInfo.m_thana_bn+'</td></tr>';
+            html +='<tr><td>মৌজার নাম</td><td>'+$pltoInfo.m_name_bn+'</td></tr>';
+            html +='<tr><td>জে এল নাম্বার</td><td>'+$pltoInfo.jl_no_bn+'</td></tr>';
+            html +='<tr><td>সিট নাম্বার</td><td>'+$pltoInfo.sht_no_bn+'</td></tr>';
+            html +='<tr><td>লেয়ার আইডি</td><td>'+$pltoInfo.l_code_bn+'</td></tr>';
+            html +='<tr><td>লেয়ারের নাম</td><td>'+$pltoInfo.l_name_bn+'</td></tr>';
+            html +='<tr><td>প্লট/দাগ নাম্বার</td><td>'+$pltoInfo.plot_no_bn+'</td></tr>';
+            html +='<tr><td>মৌজার ধরণ</td><td>'+$pltoInfo.sv_type_bn+'</td></tr>';
+            html +='<tr><td>মৌজার স্কেল</td><td>'+$pltoInfo.scale_bn+'</td></tr>';
+            html +='<tr><td>সার্ভের বছর</td><td>'+$pltoInfo.sv_year_bn+'</td></tr>';
+            html +='<tr><td>রেভিনিউ সার্ভে নাম্বার</td><td>'+$pltoInfo.rev_no_bn+'</td></tr>';
+            html +='<tr><td>জিও কোড নাম্বার</td><td>'+$pltoInfo.geocode_en.getDigitBanglaFromEnglish()+'</td></tr>';
+            //if(typeof($pltoInfo.majorclass_bn) !=='undefined'){
+            if(typeof($pltoInfo.maj_class_bn) !=='undefined'){
+                //html +='<tr><td>প্রধান শ্রেণী</td><td>'+$pltoInfo.majorclass_bn+'</td></tr>';
+                html +='<tr><td>প্রধান শ্রেণী</td><td>'+$pltoInfo.maj_class_bn+'</td></tr>';
+            }
+            if(typeof($pltoInfo.sub_class_bn) !=='undefined'){
+                html +='<tr><td>উপ শ্রেণী</td><td>'+$pltoInfo.sub_class_bn+'</td></tr>';
+            }
+            // if(typeof($pltoInfo.subclass_bn) !=='undefined'){
+            //     html +='<tr><td>উপ শ্রেণী</td><td>'+$pltoInfo.subclass_bn+'</td></tr>';
+            // }
+           
+            // html +='<tr><td>Major Class</td><td>'+$pltoInfo.majorclass+'</td></tr>';
+            // html +='<tr><td>Sub Class</td><td>'+$pltoInfo.subclass+'</td></tr>';
+            // html +='<tr><td>Remarks</td><td>'+$pltoInfo.remarks_1+'</td></tr>';
+        }
+
+        $('#PlotDetails').html(html);
+        $('.ui-dialog-title').html('প্লট/দাগ নাম্বার '+$pltoInfo.plot_no_bn+' তথ্য বিবরণঃ ');
+
+      }
+
+
+
+function printKhatian(id){
+
+    $dagtBn = id;
+    $owners ='অকৃষি প্রজা </br>সাং ';
+    $shares = '&nbsp;</br>';
+    $dagNo = '&nbsp;</br>'+$dagtBn;
+    $khatianOngsho = '&nbsp;</br>৩৩.৩';
+    $sharesLandSize = '&nbsp;</br>';
+
+    $.ajax({
+        url: '/assets/js/khatian.js',
+        type: 'GET',
+        success: function (data) {
+            var data = JSON.parse(data);
+            data = data.filter((item)=>item.Khatian == id);
+            data.forEach(element => {
+                var shareArea = parseFloat(element.Share * $khatianValue).toFixed(2);
+                $owners += element.OwnerName+'</br>';
+                $shares += element.Share+'</br>';
+                $sharesLandSize += shareArea+'</br>';              
+                $plotSize = parseFloat($khatianValue*3).toFixed(2);
+                
+                var html = `<section>
+                <h3 style="text-align:center;">খতিয়ান নং - <span id="ktNo">`+id+`</span></h3>
+
+                <div style="width:100%; display:inline">
+                    <div style="width:16%; float:left">
+                    <p class="u-custom-item u-text u-text-default u-text-2">বিভাগঃ <span id="ktDiv">`+$divName+`</span></p>
+                    </div>
+                    <div style="width:16%; float:left">
+                    <p class="u-custom-item u-text u-text-default u-text-2">জেলাঃ <span id="ktDist">`+$distName+`</span></p>
+                    </div>
+                    <div style="width:16%; float:left">
+                    <p class="u-custom-item u-text u-text-default u-text-2">থানাঃ <span id="ktThana">`+$upzName+`</span></p>
+                    </div>
+                    <div style="width:16%; float:left">
+                    <p class="u-custom-item u-text u-text-default u-text-2">মৌজাঃ <span id="ktMauza">`+$mouzaName+`</span></p>
+                    </div>
+                    <div style="width:16%; float:left">
+                    <p class="u-custom-item u-text u-text-default u-text-2">জে, এল, নংঃ <span id="ktJl">১</span></p>
+                    </div>
+                    <div style="width:16%; float:left">
+                    <p class="u-custom-item u-text u-text-default u-text-2">রেঃ সাঃ নংঃ * </p>
+                    </div>
+                </div>
+                <div class="u-align-center u-table u-table-responsive u-table-1">
+                <table style="border:1px solid #000;text-align:center;font-size:14px; border-collapse: collapse">
+                    <colgroup>
+                    <col width="18.4%">
+                    <col width="5.6%">
+                    <col width="2.8%">
+                    <col width="6.3%">
+                    <col width="8.8%">
+                    <col width="6.8%">
+                    <col width="9.9%">
+                    <col width="11.7%">
+                    <col width="10.7%">
+                    <col width="19.1%">
+                    </colgroup>
+                    <tbody>
+                    <tr style="height: 79px;border:1px solid #000">
+                        <td style="border:1px solid #000">মালিক, অকৃষি প্রজা বা ইজারাদারের নাম ও ঠিকানা&nbsp;</td>
+                        <td style="border:1px solid #000">অংশ</td>
+                        <td style="border:1px solid #000">রাজস্ব&nbsp;</td>
+                        <td style="border:1px solid #000">দাগ নং&nbsp;</td>
+                        <td style="border:1px solid #000" colspan="2">জমি ও শ্রেণী</td>
+                        <td style="border:1px solid #000">দাগের মোট পরিমাণ</td>
+                        <td style="border:1px solid #000">দাগের মধ্যে অত্র খতিয়ানের অংশ&nbsp;</td>
+                        <td style="border:1px solid #000">অংশানুযায়ী জমির পরিমাণ&nbsp;</td>
+                        <td style="border:1px solid #000">দখল বিষয়ক বা অন্যান্য বিশেষ মন্তব্য</td>
+                    </tr>
+                    <tr style="height: 46px;">
+                        <td style="border:1px solid #000">১</td>
+                        <td style="border:1px solid #000">২</td>
+                        <td style="border:1px solid #000">৩</td>
+                        <td style="border:1px solid #000">৪</td>
+                        <td style="border:1px solid #000">কৃষি&nbsp;<br>৫(ক)</td>
+                        <td style="border:1px solid #000">অকৃষি&nbsp;<br>৫(খ)</td>
+                        <td style="border:1px solid #000">শতাংশ&nbsp;<br>৬</td>
+                        <td style="border:1px solid #000">৭</td>
+                        <td style="border:1px solid #000">শতাংশ&nbsp;&nbsp;<br>৮</td>
+                        <td style="border:1px solid #000">৯</td>
+                    </tr>
+                    <tr style="height:250px">
+                        <td style="border:1px solid #000"><span id="ktOwnars">`+$owners+`</span></td>
+                        <td style="border:1px solid #000"><span id="ktShare">`+$shares.getDigitBanglaFromEnglish()+`</span></td>
+                        <td style="border:1px solid #000"><span id="ktTax"></span></td>
+                        <td style="border:1px solid #000"><span id="ktPlotNo">`+$plotNo.getDigitBanglaFromEnglish()+`</span></td>
+                        <td style="border:1px solid #000"><span id="ktLand"></span></td>
+                        <td style="border:1px solid #000"><span id="ktLandClass">নাল</span></td>
+                        <td style="border:1px solid #000"><span id="ktLandSize">`+$plotSize.getDigitBanglaFromEnglish()+`</span></td>
+                        <td style="border:1px solid #000">`+$khatianOngsho+`</td>
+                        <td style="border:1px solid #000">`+$sharesLandSize.getDigitBanglaFromEnglish()+`</td>
+                        <td style="border:1px solid #000"><img style="width:50%" src="/assets/media/stamp.png"></img></td>
+                    </tr>
+                    <tr style="height: 99px;">
+                        <td style="border:1px solid #000">... ... ... ধারামতে মোট বা পরিবর্তন <br/>মায় মোকদ্দমা নং এবং সন ।</td>
+                        <td style="border:1px solid #000" colspan="7"><br/><strong style="float:right">মোট জমিঃ</strong>  <br/><i style="padding-top:15px;">পরিবার পরিকল্পনা গ্রহন করুন ।</i></td>
+                        <td style="border:1px solid #000">`+$khatianValue.getDigitBanglaFromEnglish()+`</td>
+                        <td style="border:1px solid #000"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+            </section>`;
+
+
+            $("#modalUI").dialog({
+                modal: true,
+                autoOpen: false,
+                collapseEnabled: true,
+                title: "",
+                width: 1200,
+                //height: ,
+                show: {
+                  effect: "blind",
+                  duration: 300
+                },
+                hide: {
+                  effect: "clip",
+                  duration: 200
+                } 
+              }).dialog("open");
+
+        
+            $('#modalUI').html(html);
+            $('.ui-dialog-title').html('খতিয়ানের তথ্যঃ Dummy');
+
+            });
+        }
+    });
+
+
+}
+
+
+let highlight;
+$khatianValue=0;
+$plotSize=0;
+$plotNo=0;
+$landUse ='';
+
+
+
+
+const displayFeatureInfo = function (pixel,evt) {
+    $mcode = "";
+    $layerName ="";
+     var clickedPosition =  ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+    plotVectorLayer.getFeatures(pixel).then(function (features) {
+        if (!features.length) {
+            return;
+        }
+        const feature = features[0];
+        if (!feature) {
+            return;
+        }
+
+        globalLayer.getSource().clear();
+
+        //console.log(feature.C.m_code);
+        $mcode = feature.get('m_code');
+        $jl = feature.get('jl');
+        $plot = feature.get('plotEn');
+        $sht = feature.get('sht');
+        if($mcode != ""){
+            $layerName = $mcode.substr(0,7).toLowerCase();
+            //console.log($layerName);
+            if($layerName != ""){
+
+                blockUI();
+                $.ajax({
+                    url: '/GetPlotInfo',
+                    type: 'POST',
+                    data: {
+                        'lat': clickedPosition[1],
+                        'lon': clickedPosition[0],
+                        'table': $layerName,
+                        'plot':$plot,
+                        'sht':$sht,
+                        'jl':$jl,
+                        "_token": $('#token').val()
+                    },
+                    success: function (data) {
+                    //console.log(data);
+                    unblockUI();
+                    if(data.length == 0){
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'দুঃখিত',
+                            text: 'ভুমি ব্যাবহার তথ্য পাওয়া যায়নি!',
+                          });
+                        return;
+                    }
+                    $pltoInfo = data[0];
+                    if(typeof($pltoInfo) == 'undefined'){
+                        return;
+                    }
+                    var html =`<style>.nav-link {
+                        display: block;
+                        padding: 0.25rem 1rem;
+                    }</style>
+                    <h5 style="margin-bottom:7px;color:#ff9900;">ভূমি তথ্য বিবরণঃ</h5>
+                        <div class="col-md-12" style="padding:0px;"><ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a role="button" onClick="showInfo('bn',this)" class="nav-link active" data-bs-toggle="tab">বাংলা</a>
+                        </li>
+                        <li class="nav-item">
+                            <a role="button" onClick="showInfo('en',this)" class="nav-link" data-bs-toggle="tab">English</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active">
+                            <div id="PlotDetails">
+                            </div>
+                        </div>
+                    </div></div>`;
+
+
+              $('#dialog-win').html(html);
+              $($('.nav-item .active')[0]).trigger('click');
+              
+                $('#dialog-win').dialog({
+                    // title: 'Union Status',
+                    width:600,
+                    modal: true,
+                    width: $(window).width() > 400 ? "600px" : $(window).width(),
+                    responsive: true,
+                    show: {
+                        effect: "blind",
+                        duration: 300
+                    },
+                    hide: {
+                        effect: "blind",
+                        duration: 500
+                    },
+                    beforeClose: function (event, ui) {
+                        setTimeout(function(){
+                            $('#dialog-win').html('');
+                            $('.ui-dialog-title').html('');
+                        },1000);
+                    },
+                });
+
+                
+
+               
+                },
+                error:function(){
+                    unblockUI();
+                }
+
+            });
+        }
+          
+        }
+    });
+
+};
+
+      
+      map.on('singleclick', function (evt) {
+
+        var sheetVal = $('#Sheet').val();
+        var plotVal = $('#Plot').val();
+        var mouza = $('#Mouza').val();
+        //console.log(sheetVal,plotVal);
+        if(mouza != null || sheetVal != null || plotVal != null){
+            displayFeatureInfo(evt.pixel,evt);
+        }
+        else{
+           //swal.fire('Please select mouza sheet or plot first');
+            if(!$('.polygon').hasClass('ol-active') && !$('.linestring').hasClass('ol-active') && !$('.select').hasClass('ol-active')){
+                toastr.warning('Please select mouza/sheet/plot first');
+            }
+         
+        }
+      });
+
+
+      map.on('dblclick', function (evt) {
+         //getFetureInfo(evt.coordinate);
+       });
+
+      var selectedlevel = 'forDiv';
+      var zoomVal = 50000;
+      function getFetureInfo(coordinate){
+        var formatWKT = new ol.format.WKT();
+        var clickedPosition =  ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
+       
+
+        $.ajax({
+            url: '/GetCascadeGeom',
+            type: 'POST',
+            data: {
+                level: selectedlevel,
+                'lat': clickedPosition[1],
+                'lon': clickedPosition[0],
+                "_token": $('#token').val()
+            },
+            success: function (data) {
+                var fProjection = 'EPSG:3857';
+                if(selectedlevel == 'forMauza'){
+                    fProjection = 'EPSG:4326';
+                }
+                globalLayer.getSource().clear();
+                for(var i=0; i<data.length; i++){
+                    var dt = data[i].geom;
+                    // console.log(data[i].divname);
+                    if (formatWKT.readFeatures(dt)) {                        
+                        formatWKT.readFeatures(dt, {
+                            dataProjection: 'EPSG:4326',
+                            featureProjection:fProjection
+                        }).forEach(function (ft) {
+                            var label = data[i].label;
+                            var myStyle = new ol.style.Style({
+                                fill: new ol.style.Fill({
+                                color: 'rgba(255, 255, 255, 0.4)',
+                                }),
+                                stroke:new ol.style.Stroke({
+                                color: '#088dcf7d',
+                                width: 1,
+                                }),
+                            text: new ol.style.Text({
+                                font: '12px Calibri,sans-serif',
+                                fill: new ol.style.Fill({
+                                color: '#FFFFFF'
+                                }),
+                                stroke: new ol.style.Stroke({
+                                    color: '#000000',
+                                    width: 5
+                                }),
+                            })
+                            });
+                        
+                            Object.entries(data[i]).forEach(([key, value]) => {
+                                if(key != 'geom'){
+                                    ft.set(key,value);
+                                }                                
+                            });
+                            myStyle.getText().setText(label);
+                            ft.setStyle(myStyle);
+                            
+                            globalLayer.getSource().addFeature(ft);
+                        });
+                    }
+
+                    if(i == 0){
+                        var extent = ol.extent.buffer(globalLayer.getSource().getFeatures()[0].getGeometry().getExtent(),zoomVal);
+                        map.getView().fit(extent, map.getSize());
+                    }
+                }
+
+                if(selectedlevel == 'forDiv'){
+                    selectedlevel ='forDist';
+                    zoomVal = 40000;
+                }
+                else if(selectedlevel == 'forDist'){
+                    selectedlevel ='forThana';
+                    zoomVal = 30000;
+                }
+                else if(selectedlevel == 'forThana'){
+                    selectedlevel ='forUnion';
+                    zoomVal = 8000;
+                }
+                else if(selectedlevel == 'forUnion'){
+                    selectedlevel ='forMauza';
+                    zoomVal = 5000;
+                }
+                else if(selectedlevel == 'forMauza'){
+                    selectedlevel ='forPlot';
+                    zoomVal = 5000;
+                }
+              
+            }
+        });   
+      }
+
+    
+function showMauzaSummary(){
+    var mauza = $('#Mouza').val();
+    var mauza_code = $('#Mouza option:selected').attr('m_code');
+    if(mauza != undefined && mauza != ''){
+        blockUI();
+    $.ajax({
+            type: 'POST',
+            url: 'GetMauzaSummary',
+            data: {
+                mauzaVal: mauza,
+                mauza_tab: mauza_code.toLowerCase(),
+                "_token": $('#token').val()
+            },
+            success: function (data) {
+                unblockUI();
+                // console.log(data);
+                var totalPlots = 0;
+                var totalArea = 0;
+
+                data.summary.forEach(element => {
+                    totalArea+=parseFloat(element.area_decimal);
+                    totalPlots+=element.total_plots;
+                });
+
+                $majorclassData = [];
+                $subclassData = [];
+
+                data.major_class.forEach(item =>{
+                    $majorclassData.push({'name':item.major_class,'y': parseFloat(item.percentage)});
+                });
+
+                data.sub_class.forEach(item =>{
+                    $subclassData.push({'name':item.sub_class,'y': parseFloat(item.percentage)});
+                });
+
+                var html='<div class="col-md-12" style="padding-right:0px;"><h5 style="margin-bottom:10px;color:#ff9900;">মৌজার তথ্যঃ '+$mouzaName+'</h5><table class="table table-bordered table-stripped"><tbody>';
+                html +='<tr><td>বিভাগের নাম</td><td>'+$divName+'</td></tr>';
+                html +='<tr><td>জেলার নাম</td><td>'+$distName+'</td></tr>';
+                html +='<tr><td>থানা/উপজেলার নাম</td><td>'+$upzName+'</td></tr>';
+                // html +='<tr><td>ইউনিয়নের নাম</td><td>'+$uniName+'</td></tr>';
+                html +='<tr><td>মৌজার নাম</td><td>'+$mouzaName+'</td></tr>';
+                //html +='<tr><td>মৌজার আয়তন</td><td>'+totalArea.toString().getDigitBanglaFromEnglish()+' শতক</td></tr>';
+                html +='<tr><td>মোট দাগ সংখ্যা</td><td><span class="btn btn-rounded btn-alt-danger" style="line-height: 5px;"> '+totalPlots.toString().getDigitBanglaFromEnglish()+'</span></td></tr>';
+
+                // data.forEach(element => {
+                //     html +='<tr><td>'+element.landuse+'</td><td>প্লট সংখ্যা <span class="badge badge-primary">'+element.total_plots.toString().getDigitBanglaFromEnglish()+'</span>, <span class="badge badge-info">'+element.area_decimal.toString().getDigitBanglaFromEnglish()+'</span> শতক</td></tr>';
+                // });
+
+                // html +='<tr style="background-color: #ddd;"><td>মোট খতিয়ান </td><td>৯৯৯</td></tr>';
+                // html +='<tr style="background-color: #ddd;"><td>মোট কর</td><td>৮৮৮</td></tr>';
+                // html +='<tr style="background-color: #ddd;"><td>মোট আদায়</td><td>৭৭৭</td></tr>';
+                html += `</tbody></table></div>
+                <div class="col-md-6" style="float:left;"><div id="container1" style="border: 1px solid #ddd;"></div></div>
+                <div class="col-md-6" style="float:left; padding-right:0px;"><div id="container2" style="border: 1px solid #ddd;"></div></div>
+                `;
+
+                $("#modalUI").dialog({
+                    modal: true,
+                    autoOpen: false,
+                    collapseEnabled: true,
+                    title: "",
+                    //width: 800,
+                    width: $(window).width() > 1100 ? "1100px" : $(window).width(),
+                    show: {
+                      effect: "blind",
+                      duration: 300
+                    },
+                    hide: {
+                      effect: "clip",
+                      duration: 200
+                    } 
+                  }).dialog("open");
+            
+                  $('#modalUI').html(html);
+                  $('.ui-dialog-title').html('সংক্ষিপ্ত তথ্য:');
+
+                  Highcharts.chart('container1', {
+                    chart: {
+                      plotBackgroundColor: null,
+                      plotBorderWidth: null,
+                      plotShadow: false,
+                      type: 'pie'
+                    },
+                    title: {
+                      text: 'প্রধান শ্রেণী অনুসারে জমির শতকরা পরিমাণঃ'
+                    },
+                    tooltip: {
+                      pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                    },
+                    accessibility: {
+                      point: {
+                        valueSuffix: '%'
+                      }
+                    },
+                    plotOptions: {
+                      pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                          enabled: true,
+                          format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                        }
+                      }
+                    },
+                    series: [{
+                      name: '',
+                      colorByPoint: true,
+                      data: $majorclassData
+                    }]
+                  });
+
+
+                  Highcharts.chart('container2', {
+                    chart: {
+                      plotBackgroundColor: null,
+                      plotBorderWidth: null,
+                      plotShadow: false,
+                      type: 'pie'
+                    },
+                    title: {
+                      text: 'উপ শ্রেণী অনুসারে জমির শতকরা পরিমাণঃ'
+                    },
+                    tooltip: {
+                      pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                    },
+                    accessibility: {
+                      point: {
+                        valueSuffix: '%'
+                      }
+                    },
+                    plotOptions: {
+                      pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                          enabled: true,
+                          format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                        }
+                      }
+                    },
+                    series: [{
+                      name: '',
+                      colorByPoint: true,
+                      data: $subclassData
+                    }]
+                  });
+            },
+            error:function(){
+                unblockUI();
+            }
+        });
+    }
+    else{
+       // alert('Please select a mauza first.');
+       //toastr.warning('Please select a mouza first');
+       Swal.fire({
+        icon: 'error',
+        title: 'দুঃখিত...',
+        text: 'বিভাগ, জেলা, উপজেলা ও মৌজা নির্বাচন করুন!',
+      })
+    }
+}
+
+
+function showMauzaFilterSummary(landuseText){
+    var mauza = $('#Mouza').val();
+    var mauza_code = $('#Mouza option:selected').attr('m_code');
+    if(mauza != undefined && mauza != ''){
+        blockUI();
+    $.ajax({
+            type: 'POST',
+            url: 'GetMauzaFilterdSummary',
+            data: {
+                mauzaVal: mauza,
+                mauza_tab: mauza_code.toLowerCase(),
+                landuse: $('#ddl-landuse').val().split(" ")[0].toLowerCase(),
+                "_token": $('#token').val()
+            },
+            success: function (data) {
+                unblockUI();
+
+                var totalPlots = data.major_class.plots;
+                //var totalArea = 0;
+
+                $majorclassData = [];
+                $subclassData = [];
+
+                data.sub_class.forEach(item =>{
+                    $subclassData.push({'name':item.sub_class,'y': parseFloat(item.percentage)});
+                });
+
+                var html='<div class="col-md-12" style="padding-right:0px;"><h5 style="margin-bottom:10px;color:#ff9900;"></h5><table class="table table-bordered table-stripped"><tbody>';
+                html +='<tr><td>ভুমি ব্যবহার</td><td><span class="btn btn-rounded btn-alt-danger" style="line-height: 5px;"> '+landuseText+'</span></td></tr>';
+                html +='<tr><td>মোট দাগ সংখ্যা</td><td><span class="btn btn-rounded btn-alt-danger" style="line-height: 5px;"> '+totalPlots.toString().getDigitBanglaFromEnglish()+'</span></td></tr>';
+                html += `</tbody></table></div>
+                    <div class="col-md-12" style="float:left; padding-right:0px;"><div id="container2" style="border: 1px solid #ddd;"></div></div>
+                `;
+
+                $("#modalUI").dialog({
+                    modal: true,
+                    autoOpen: false,
+                    collapseEnabled: true,
+                    title: "",
+                    //width: 800,
+                    width: $(window).width() > 1100 ? "500px" : $(window).width(),
+                    show: {
+                      effect: "blind",
+                      duration: 300
+                    },
+                    hide: {
+                      effect: "clip",
+                      duration: 200
+                    } 
+                }).dialog("open");
+            
+                  $('#modalUI').html(html);
+                  $('.ui-dialog-title').html('মৌজার সংক্ষিপ্ত তথ্য: '+$mouzaName);
+                  Highcharts.chart('container2', {
+                    chart: {
+                      plotBackgroundColor: null,
+                      plotBorderWidth: null,
+                      plotShadow: false,
+                      type: 'pie'
+                    },
+                    title: {
+                      text: 'উপ শ্রেণী অনুসারে জমির শতকরা পরিমাণঃ'
+                    },
+                    tooltip: {
+                      pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                    },
+                    accessibility: {
+                      point: {
+                        valueSuffix: '%'
+                      }
+                    },
+                    plotOptions: {
+                      pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                          enabled: true,
+                          format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                        }
+                      }
+                    },
+                    series: [{
+                      name: '',
+                      colorByPoint: true,
+                      data: $subclassData
+                    }]
+                  });
+            },
+            error:function(){
+                unblockUI();
+            }
+        });
+    }
+    else{
+       // alert('Please select a mauza first.');
+       //toastr.warning('Please select a mouza first');
+       Swal.fire({
+        icon: 'error',
+        title: 'দুঃখিত...',
+        text: 'বিভাগ, জেলা, উপজেলা ও মৌজা নির্বাচন করুন!',
+      })
+    }
+}
+
+function getMauzaSummary(){
+    var mauza = $('#Mouza').val();
+    var mauza_code = $('#Mouza option:selected').attr('m_code');
+    if(mauza != undefined && mauza != ''){
+    $.ajax({
+            type: 'POST',
+            url: 'GetMauzaSummary',
+            data: {
+                mauzaVal: mauza,
+                mauza_tab: mauza_code.toLowerCase(),
+                "_token": $('#token').val()
+            },
+            success: function (data) {
+                // console.log(data);
+                var totalPlots = 0;
+                var totalArea = 0;
+
+                data.summary.forEach(element => {
+                    totalArea+=parseFloat(element.area_decimal);
+                    totalPlots+=element.total_plots;
+                });
+
+                $majorclassData = [];
+                $subclassData = [];
+
+                data.major_class.forEach(item =>{
+                    $majorclassData.push({'name':item.major_class,'y': parseFloat(item.percentage)});
+                });
+
+                data.sub_class.forEach(item =>{
+                    $subclassData.push({'name':item.sub_class,'y': parseFloat(item.percentage)});
+                });
+
+                var html='<div class="col-md-12" style="padding-right:0px;"><h5 style="margin-bottom:10px;color:#ff9900;">মৌজার তথ্যঃ '+$mouzaName+'</h5><table class="table table-bordered table-stripped"><tbody>';
+                html +='<tr><td>বিভাগের নাম</td><td>'+$divName+'</td></tr>';
+                html +='<tr><td>জেলার নাম</td><td>'+$distName+'</td></tr>';
+                html +='<tr><td>থানা/উপজেলার নাম</td><td>'+$upzName+'</td></tr>';
+                html +='<tr><td>মৌজার নাম</td><td>'+$mouzaName+'</td></tr>';
+                html +='<tr><td>মোট দাগ সংখ্যা</td><td><span class="btn btn-rounded btn-alt-danger" style="line-height: 5px;"> '+totalPlots.toString().getDigitBanglaFromEnglish()+'</span></td></tr>';
+                html += `</tbody></table></div>
+                <div class="col-md-6" style="float:left;"><div id="container1" style="border: 1px solid #ddd;"></div></div>
+                <div class="col-md-6" style="float:left; padding-right:0px;"><div id="container2" style="border: 1px solid #ddd;"></div></div>`;
+
+                $('#mauza_pie').html(html);
+                // $('.ui-dialog-title').html('সংক্ষিপ্ত তথ্য:');
+
+                Highcharts.chart('container1', {
+                    chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                    },
+                    title: {
+                    text: 'প্রধান শ্রেণী অনুসারে জমির শতকরা পরিমাণঃ'
+                    },
+                    tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                    },
+                    accessibility: {
+                    point: {
+                        valueSuffix: '%'
+                    }
+                    },
+                    plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                        }
+                    }
+                    },
+                    series: [{
+                    name: '',
+                    colorByPoint: true,
+                    data: $majorclassData
+                    }]
+                });
+
+                Highcharts.chart('container2', {
+                    chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                    },
+                    title: {
+                    text: 'উপ শ্রেণী অনুসারে জমির শতকরা পরিমাণঃ'
+                    },
+                    tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                    },
+                    accessibility: {
+                    point: {
+                        valueSuffix: '%'
+                    }
+                    },
+                    plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                        }
+                    }
+                    },
+                    series: [{
+                    name: '',
+                    colorByPoint: true,
+                    data: $subclassData
+                    }]
+                });
+            }
+        });
+    }
+    else{
+        Swal.fire({
+            icon: 'error',
+            title: 'দুঃখিত...',
+            text: 'বিভাগ, জেলা, উপজেলা ও মৌজা নির্বাচন করুন!',
+        });
+    }
+}
+$(document).ready(function(){
+    $('.ol-layerswitcher .panel-container ul.panel li label').on('click',function(){
+        //alert('Change Legend');
+            var checked = $('[title="Land Use"]').siblings('input:checkbox').is(":checked");
+            if(checked){
+                if($('.ol-legend').hasClass('ol-collapsed')){
+                    $('.ol-legend').removeClass('ol-collapsed');
+                }
+            }
+            else{
+                $('.ol-legend').addClass('ol-collapsed');
+            }
+    });
+});
+
+
+function getLandUse(landuse){
+    if(landuse == null || landuse == ''){
+        return '#F5CA7A'
+    }
+    else if(landuse.includes('Agricul')){
+        return '#73B273';
+    }
+    else if(landuse.includes('Commercial')){
+        return '#E64C00';
+    }
+    else if(landuse.includes('Industrial')){
+        return '#732600';
+    }
+    else if(landuse.includes('Residential')){
+        return '#FFBEBE';
+    }
+    else if(landuse.includes('Educational')){
+        return '#FF00C5';
+    }
+    else if(landuse.includes('River')){
+        return '#97DBF2';
+    }
+    else if(landuse.includes('Recreational')){
+        return '#BEFFE8';
+    }
+    else if(landuse.includes('Forest')){
+        return '#38A800';
+    }
+    else if(landuse.includes('Religious')){
+        return '#E1E1E1';
+    }
+    else if(landuse.includes('Official')){
+        return '#FFADEC';
+    }
+    else if(landuse.includes('Miscellaneous')){
+        return '#F5CA7A';
+    }
+    else if(landuse.includes('Road')){
+        return '#FFEB1A';
+    }
+    else if(landuse.includes('Monument')){
+        return '#D3FFBE';
+    }
+    else if(landuse.includes('Water')){
+        return '#0070FF';
+    }
+    else if(landuse.includes('Terminal')){
+        return '#CA7AF5';
+    }
+    else if(landuse.includes('Mausoleum')){
+        return '#FF9F29';
+    }
+    else {
+        return '#F5CA7A';
+    }
+}
+
+
+function landuseSelectionChanged(){
+    if($allPlots.length  > 0){
+        globalLayer.getSource().clear();
+        plotVectorLayer.getSource().clear();
+        landuseVectorLayer.getSource().clear();
+
+       
+
+        var luVal = $('#ddl-landuse').val().split(' ')[0].toLowerCase();
+        var landuseText = $("#ddl-landuse option:selected").text();
+        var formatWKT = new ol.format.WKT();
+        if(luVal == ""){
+            showMauzaSummary();
+            for(var i=0; i<$allPlots.length; i++){
+                var label = $allPlots[i].label;
+                  var mcode  = $allPlots[i].m_code;
+                  var jl  = $allPlots[i].jl_no_en;
+                  var sht =  $allPlots[i].sht_no_en;
+                  var dt = $allPlots[i].geom;
+                  console.log(dt);
+                  var plot = $allPlots[i].plot_no_en;
+                  if (formatWKT.readFeatures(dt)) {
+                    formatWKT.readFeatures(dt, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:3857'
+                    }).forEach(function (ft) {
+                        ft.set('m_code',mcode);
+                        ft.set('plot',label);
+                        ft.set('plotEn',plot);
+                        ft.set('jl',jl);
+                        ft.set('sht',sht);
+                          var plotBoundaryStyle = new ol.style.Style({
+                              fill: new ol.style.Fill({
+                                  color: 'rgba(255, 255, 255, 0.0)',
+                              }),
+                              stroke:new ol.style.Stroke({
+                              color: '#FF9F29',
+                              width: 1,
+                              }),
+                          text: new ol.style.Text({
+                              font: '15px Calibri,sans-serif',
+                              fill: new ol.style.Fill({
+                              color: '#000000'
+                              }),
+                              stroke: new ol.style.Stroke({
+                                  color: '#FFFFFF',
+                                  width: 3
+                              }),
+                          })
+                          });
+
+                        plotBoundaryStyle.getText().setText(label);
+                        ft.setStyle(plotBoundaryStyle);
+                        plotVectorLayer.getSource().addFeature(ft);
+                    });
+                }
+            }
+
+            for(var i=0; i<$allLanduse.length; i++){
+                //console.log($landuse[i]);
+                  var label = $allLanduse[i].label;
+                  var mcode  = $allLanduse[i].m_code;
+                  var plot_land_use = $allLanduse[i].maj_class;
+                  var dt = $allLanduse[i].geom;
+                  if (formatWKT.readFeatures(dt)) {
+                      formatWKT.readFeatures(dt, {
+                          dataProjection: 'EPSG:4326',
+                          featureProjection: 'EPSG:3857'
+                      }).forEach(function (ft) {
+                          ft.set('m_code',mcode);
+                          var luc = getLandUse(plot_land_use);
+                            var landUseStyle = new ol.style.Style({
+                                fill: new ol.style.Fill({
+                                    color: luc,
+                                })
+                            })
+                            
+                          ft.setStyle(landUseStyle);
+                          landuseVectorLayer.getSource().addFeature(ft);
+                      });
+                  }
+              }
+        }
+        else{
+
+            $filtered = [];
+            $filterdPlotBnd = [];
+
+            showMauzaFilterSummary(landuseText);
+
+            for(var i=0; i<$allLanduse.length; i++){                
+                var plot_land_use = $allLanduse[i].maj_class.toLowerCase();
+                if(plot_land_use.includes(luVal)){
+                $filtered.push($allLanduse[i]);
+                }
+            }
+
+            for(var i=0; i<$filtered.length; i++){
+                //console.log($landuse[i]);
+                  var label = $filtered[i].label;
+                  var mcode  = $filtered[i].m_code;
+                  var plot_land_use = $filtered[i].maj_class;
+                  var lu_plot_no = $filtered[i].plot_no_en;
+                  var dt = $filtered[i].geom;
+                  if (formatWKT.readFeatures(dt)) {
+                      formatWKT.readFeatures(dt, {
+                          dataProjection: 'EPSG:4326',
+                          featureProjection: 'EPSG:3857'
+                      }).forEach(function (ft) {
+                          ft.set('m_code',mcode);
+                          var luc = getLandUse(plot_land_use);
+                            var landUseStyle = new ol.style.Style({
+                                fill: new ol.style.Fill({
+                                    color: luc,
+                                })
+                            })
+                            
+                          ft.setStyle(landUseStyle);
+                          landuseVectorLayer.getSource().addFeature(ft);
+
+
+                        for(var i=0; i<$allPlots.length; i++){                          
+                            var plot_no = $allPlots[i].plot_no_en;
+                            if(plot_no == lu_plot_no){
+                                $filterdPlotBnd.push($allPlots[i]);
+                            }     
+                        }
+
+                      });
+                }
+            }
+
+            for(var i=0; i<$filterdPlotBnd.length; i++){
+                var label = $filterdPlotBnd[i].label;
+                  var mcode  = $filterdPlotBnd[i].m_code;
+                  var jl  = $filterdPlotBnd[i].jl_no_en;
+                  var sht =  $filterdPlotBnd[i].sht_no_en;
+                  var dt = $filterdPlotBnd[i].geom;
+                  //console.log(dt);
+                  var plot = $filterdPlotBnd[i].plot_no_en;
+                  if (formatWKT.readFeatures(dt)) {
+                    formatWKT.readFeatures(dt, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:3857'
+                    }).forEach(function (ft) {
+                        ft.set('m_code',mcode);
+                        ft.set('plot',label);
+                        ft.set('plotEn',plot);
+                        ft.set('jl',jl);
+                        ft.set('sht',sht);
+                          var plotBoundaryStyle = new ol.style.Style({
+                              fill: new ol.style.Fill({
+                                  color: 'rgba(255, 255, 255, 0.0)',
+                              }),
+                              stroke:new ol.style.Stroke({
+                              color: '#FF9F29',
+                              width: 1,
+                              }),
+                          text: new ol.style.Text({
+                              font: '15px Calibri,sans-serif',
+                              fill: new ol.style.Fill({
+                              color: '#000000'
+                              }),
+                              stroke: new ol.style.Stroke({
+                                  color: '#FFFFFF',
+                                  width: 3
+                              }),
+                          })
+                          });
+
+                        plotBoundaryStyle.getText().setText(label);
+                        ft.setStyle(plotBoundaryStyle);
+                        plotVectorLayer.getSource().addFeature(ft);
+                    });
+                }
+            }
+
+
+
+        }
+    }
+    else{
+        Swal.fire({
+            icon: 'error',
+            title: 'দুঃখিত...',
+            text: 'বিভাগ, জেলা, উপজেলা ও মৌজা নির্বাচন করুন!',
+        });
+        $('#ddl-landuse').select2('destroy');
+        $('#ddl-landuse').val('').select2();
+    }
+}
+
+$(document).ready(function(){
+    pupulateCascadedropdowns();
+ 
+})
