@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApprovalFlow;
 use App\Models\Category;
 use App\Models\Condition;
 use App\Models\Division;
@@ -15,7 +16,7 @@ use App\Models\Status;
 use App\Models\Uploaddocuments;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use DateTime;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class RequisitionController extends Controller
@@ -147,6 +148,23 @@ class RequisitionController extends Controller
                     ];
                     RequisitionDetails::create($data);
                 }
+                // Approval Flow
+
+                $appflow = new ApprovalFlow();
+                $appflow->documenttypeid = 1;
+                $appflow->documentid = $requisition->id;
+                $appflow->projectno = $requisition->projectno;
+                $appflow->submitdate = Carbon::now()->toDateString();
+                $appflow->statusid = 2;
+                $appflow->approvalpathid = 1;
+                $appflow->fromauthorid = Auth::user()->id;
+                $appflow->toauthorid = 3;
+                $appflow->comments = "";
+                $appflow->iscurrentflow = true;
+
+                $appflow->save();
+
+
                 // Save file data and storage PDF
                 if ($request->hasFile('pdffile')) {
                     $file = $request->file('pdffile');
@@ -205,23 +223,32 @@ class RequisitionController extends Controller
         return view("--");
     }
 
-    public function update(Request $request, $id)
+    public function update($id)
     {
-        dd($id);
-        dd($request);
+        $requisition = RequisitionInfo::all()->where('id', $id)->first();
+        dd($requisition);
+        $toauthorid = 0;
+        if ($requisition->statusid == 2) {
+            $toauthorid = 3;
+        } elseif ($requisition->statusid == 3) {
+            $toauthorid = 6;
+        } elseif ($requisition->statusid == 4) {
+            $toauthorid = 5;
+        }
+        //dd($id);
+        $appflow = new ApprovalFlow();
+        $appflow->documenttypeid = 1;
+        $appflow->documentid = $requisition->id;
+        $appflow->projectno = $requisition->projectno;
+        $appflow->submitdate = Carbon::now()->toDateString();
+        $appflow->statusid = 3;
+        $appflow->approvalpathid = 2;
+        $appflow->fromauthorid = Auth::user()->id;
+        $appflow->toauthorid = 6;
+        $appflow->comments = "";
+        $appflow->iscurrentflow = true;
 
-        // $request->validate([
-        //     'to_user_id'    => 'required',
-        //     'transfer_date' => 'required',
-        //     'equipment_id'  => 'required',
-        //     'remarks'       => 'required'
-        // ]);
-
-        // DB::transaction(function () use ($request, $id) {
-        //     $result = Transfer::find($id);
-        //     $request->request->add(['updated_by' => Auth::id(), 'updated_at' => Carbon::now()]);
-        //     $result->update($request->all());
-        // });
+        $appflow->save();
 
         return redirect()->route('admin.requisitions.index')->with(['message' => 'Equipment transfer updated successfully.']);
     }

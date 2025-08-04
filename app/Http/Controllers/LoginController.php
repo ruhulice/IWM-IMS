@@ -18,12 +18,12 @@ class LoginController extends Controller
 
     public function login()
     {
-       return view('authentication.login');
+        return view('authentication.login');
     }
 
     public function authenticate(Request $request)
     {
-        
+
         $this->validate(
             $request,
             [
@@ -39,7 +39,7 @@ class LoginController extends Controller
             ]
         );
 
-        $username = $request->username;
+        $username = strtoupper($request->username);
         $password = $request->password;
         //$user_code = $request->user_code;
         //dd($username."--".$password);
@@ -50,7 +50,7 @@ class LoginController extends Controller
         //dd($user);
 
         if ($user && $password === $user->password) {
-                // if ($user && Hash::check($password, $user->password)) {
+            // if ($user && Hash::check($password, $user->password)) {
             Auth::login($user);
             User::findOrFail($user->id)->update(['last_login_time' => Carbon::now(), 'last_login_ip' => request()->ip()]);
             Session::put('login_id', $user->id);
@@ -59,7 +59,7 @@ class LoginController extends Controller
             return redirect()->intended('dashboard');
         }
 
-        return redirect()->route('login')->with('errorcredentials','Credentials do not match or Account not active!');
+        return redirect()->route('login')->with('errorcredentials', 'Credentials do not match or Account not active!');
     }
 
     public function logout()

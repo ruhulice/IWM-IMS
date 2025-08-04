@@ -113,8 +113,10 @@
 
         <!-- Approver Comment and Actions -->
         <div class="content mt-2">
-            <form action="" method="POST">
+            <form action="{{ route('admin.requisitions.update', $requisitions[0]->id) }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
+                @method('PUT') <!-- This is very important for PUT method -->
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group" style="min-width: 400px;">
@@ -125,13 +127,14 @@
                     </div>
                     <div class="col-md-8">
                         <div class="d-flex justify-content-start mt-4">
-                            <a class="btn btn-success mr-2" href="{{ route('admin.requisitions.index') }}">Approve</a>
+                            <button type="submit" class="btn btn-success mr-2">Approve</button>
                             <a class="btn btn-warning mr-2" href="{{ route('admin.requisitions.index') }}">Reject</a>
                             <a class="btn btn-danger" href="{{ route('admin.requisitions.index') }}">Back</a>
                         </div>
                     </div>
                 </div>
             </form>
+
         </div>
     </div>
 @endsection
