@@ -33,34 +33,103 @@ class RequisitionController extends Controller
         $users = User::all();
         $category = Category::whereIn('categoryid', ['CM','CP','CS','CE','CA'])->get();
         $statues = Status::all();
-        $requisitions = DB::table('requisitioninfo as reqi')
-          ->join('requisitiondetails as reqd', 'reqi.id', '=', 'reqd.requisitionid')
-          ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
-          ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
-          ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
-          ->join('division as d', 'reqi.divisionid', '=', 'd.divid') // ✅ fixed here
-          ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
-          ->select(
-              'reqi.id',
-              'reqi.requisitionby',
-              'u.name',
-              'reqi.requisitiondate',
-              'reqi.status as status_id',
-              's.status as status',
-              'reqi.reqpurpose',
-              'reqi.divisionid',
-              'd.divisionname',
-              'reqi.projectno',
-              'reqd.categoryid',
-              'c.categoryname',
-              'reqd.subcategoryid',
-              'sc.subcategoryname',
-              'reqd.techspecification',
-              'reqd.rate',
-              'reqd.quantity',
-              'reqd.uom',
-              'reqd.price'
-          ) ->orderBy('reqi.id', 'desc') ->get();
+        $Loginuser = Auth::user();
+
+        $statusid = 1;
+        $statusidList = []; // for RUH
+
+        // Determine status filter based on user
+        if ($Loginuser->user_name === "MMM") {
+            $statusid = 1;
+        } elseif ($Loginuser->user_name === "ALD") {
+            $statusid = 2;
+        } elseif ($Loginuser->user_name === "MAI") {
+            $statusid = 3;
+        } elseif ($Loginuser->user_name === "SMR") {
+            $statusid = 4;
+        } elseif ($Loginuser->user_name === "RUH") {
+            $statusidList = [1, 2, 3, 4, 5];
+        }
+
+        // Build base query
+        $query = DB::table('requisitioninfo as reqi')
+            ->join('requisitiondetails as reqd', 'reqi.id', '=', 'reqd.requisitionid')
+            ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
+            ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
+            ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
+            ->join('division as d', 'reqi.divisionid', '=', 'd.divid')
+            ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
+            ->select(
+                'reqi.id',
+                'reqi.requisitionby',
+                'u.name',
+                'reqi.requisitiondate',
+                'reqi.status as status_id',
+                's.status as status',
+                'reqi.reqpurpose',
+                'reqi.divisionid',
+                'd.divisionname',
+                'reqi.projectno',
+                'reqd.categoryid',
+                'c.categoryname',
+                'reqd.subcategoryid',
+                'sc.subcategoryname',
+                'reqd.techspecification',
+                'reqd.rate',
+                'reqd.quantity',
+                'reqd.uom',
+                'reqd.price'
+            );
+
+        // Apply status filter
+        if (!empty($statusidList)) {
+            $query->whereIn('reqi.status', $statusidList);
+        } else {
+            $query->where('reqi.status', $statusid);
+        }
+
+        $requisitions = $query->orderBy('reqi.id', 'desc')->get();
+        //dd($requisitions);
+        // $statusid=1;
+        // if($Loginuser->user_name=="MMM"){
+        //     $statusid=1;
+        // }else if ($Loginuser->user_name=="ALD"){
+        //     $statusid=2;
+        // }else if ($Loginuser->user_name=="MAI"){
+        //     $statusid=3;
+        // }else if ($Loginuser->user_name=="SMR"){
+        //     $statusid=4;
+        // }else if ($Loginuser->user_name=="RUH"){
+        //     $statusid in [1,2,3,4,5];
+        // }
+        // $requisitions = DB::table('requisitioninfo as reqi')
+        //   ->join('requisitiondetails as reqd', 'reqi.id', '=', 'reqd.requisitionid')
+        //   ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
+        //   ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
+        //   ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
+        //   ->join('division as d', 'reqi.divisionid', '=', 'd.divid') // ✅ fixed here
+        //   ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
+        //   ->select(
+        //       'reqi.id',
+        //       'reqi.requisitionby',
+        //       'u.name',
+        //       'reqi.requisitiondate',
+        //       'reqi.status as status_id',
+        //       's.status as status',
+        //       'reqi.reqpurpose',
+        //       'reqi.divisionid',
+        //       'd.divisionname',
+        //       'reqi.projectno',
+        //       'reqd.categoryid',
+        //       'c.categoryname',
+        //       'reqd.subcategoryid',
+        //       'sc.subcategoryname',
+        //       'reqd.techspecification',
+        //       'reqd.rate',
+        //       'reqd.quantity',
+        //       'reqd.uom',
+        //       'reqd.price'
+        //   )->where('reqi.status', $statusid) ->orderBy('reqi.id', 'desc') ->get();
 
         return view('requisitions.index', compact('users', 'category', 'requisitions', 'statues'));
     }
@@ -155,7 +224,7 @@ class RequisitionController extends Controller
                 $appflow->documentid = $requisition->id;
                 $appflow->projectno = $requisition->projectno;
                 $appflow->submitdate = Carbon::now()->toDateString();
-                $appflow->statusid = 2;
+                $appflow->statusid = 1;
                 $appflow->approvalpathid = 1;
                 $appflow->fromauthorid = Auth::user()->id;
                 $appflow->toauthorid = 3;
@@ -223,31 +292,59 @@ class RequisitionController extends Controller
         return view("--");
     }
 
-    public function update($id)
+    public function update(Request $request, $id)
     {
-        $requisition = RequisitionInfo::all()->where('id', $id)->first();
-        dd($requisition);
-        $toauthorid = 0;
-        if ($requisition->statusid == 2) {
+        // dd($request->approver_comment);
+        $requisition = RequisitionInfo::where('id', $id)->first();
+        $approvalflow = ApprovalFlow::where('documentid', $id) ->where('documenttypeid', 1)
+                        ->where('iscurrentflow', true)->first();
+        //dd($approvalflow);
+        $user = Auth::user();
+        //dd($user);
+        // Determine the next approver and status
+        $toauthorid = $user->id;
+        $statusid = 1;
+        $appverpathid = 1;
+        if ($requisition->status == 1 && $approvalflow->toauthorid = $user->id) {
+            //dump($user->user_name);
             $toauthorid = 3;
-        } elseif ($requisition->statusid == 3) {
+            $statusid = 2;
+            $appverpathid = 2;
+        } elseif ($requisition->status == 2 && $approvalflow->toauthorid = $user->id) {
+            // dump($user->user_name);
             $toauthorid = 6;
-        } elseif ($requisition->statusid == 4) {
+            $statusid = 3;
+            $appverpathid = 3;
+        } elseif ($requisition->status == 3 && $approvalflow->toauthorid = $user->id) {
+            // dump($user->user_name);
+            $toauthorid = 6;
+            $statusid = 4;
+            $appverpathid = 4;
+        } elseif ($requisition->status == 4 && $approvalflow->toauthorid = $user->id) {
+            // dump($user->user_name);
             $toauthorid = 5;
+            $statusid = 5;
+            $appverpathid = 5;
         }
+        // Update Requisitioninfo
+        $requisition->status =  $statusid ;
+        $requisition->save();
+        //Update Approval Flow
+        $approvalflow->iscurrentflow = false;
+        $approvalflow->save();
         //dd($id);
         $appflow = new ApprovalFlow();
         $appflow->documenttypeid = 1;
         $appflow->documentid = $requisition->id;
         $appflow->projectno = $requisition->projectno;
         $appflow->submitdate = Carbon::now()->toDateString();
-        $appflow->statusid = 3;
-        $appflow->approvalpathid = 2;
+        $appflow->statusid = $statusid;
+        $appflow->approvalpathid =  $appverpathid;
         $appflow->fromauthorid = Auth::user()->id;
-        $appflow->toauthorid = 6;
-        $appflow->comments = "";
+        $appflow->toauthorid = $toauthorid;
+        $appflow->approvedate = Carbon::now();
+        $appflow->comments = $request->approver_comment;
         $appflow->iscurrentflow = true;
-
         $appflow->save();
 
         return redirect()->route('admin.requisitions.index')->with(['message' => 'Equipment transfer updated successfully.']);
@@ -260,7 +357,7 @@ class RequisitionController extends Controller
              ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
              ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
              ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
-             ->join('division as d', 'reqi.divisionid', '=', 'd.divid') // ✅ fixed here
+             ->join('division as d', 'reqi.divisionid', '=', 'd.divid')
              ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
              ->select(
                  'reqi.id',
@@ -346,7 +443,27 @@ class RequisitionController extends Controller
                 'reqd.price'
             )->where('reqi.id', $id)->get();
 
+        //Approval flow
+        $approvalFlows = DB::table('approvalflow as af')
+            ->join('users as u', 'af.fromauthorid', '=', 'u.id')
+            ->join('statuses as s', 'af.statusid', '=', 's.id')
+            ->select(
+                'af.id',
+                'af.fromauthorid',
+                'u.user_name',
+                'u.name',
+                'af.statusid',
+                's.status',
+                'af.submitdate',
+                'af.approvalpathid'
+            )
+            ->where('af.documentid', $id)
+            ->where('af.statusid', '<>', 1)
+            ->orderBy('af.id', 'asc')
+            ->get();
+
+
         //return view('gate_pass.gate_pass_print', compact('items'));
-        return view('requisitions.report', compact('items'));
+        return view('requisitions.report', compact('items', 'approvalFlows'));
     }
 }
