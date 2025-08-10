@@ -36,7 +36,7 @@
                             <div class="row modify_section">
                                 <div class="col-md-12">
                                     <div class="row">
-                                        <div class="col-md-3">
+                                        {{-- <div class="col-md-3">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Requisition By <span
                                                         style="color: red">*</span></label>
@@ -48,9 +48,9 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                        </div>
+                                        </div> --}}
 
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Division <span
                                                         style="color: red">*</span></label>
@@ -65,7 +65,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Project <span
                                                         style="color: red">*</span></label>
@@ -75,7 +75,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Requisition Date <span
                                                         style="color: red">*</span></label>
@@ -120,7 +120,7 @@
                                                 <th>Category <span style="color: red">*</span></th>
                                                 <th>Sub Category <span style="color: red">*</span></th>
                                                 <th>Technical Specification <span style="color: red">*</span></th>
-                                                <th>Rate <span style="color: red">*</span></th>
+                                                <th>Rate(Approx.) <span style="color: red">*</span></th>
                                                 <th>Quantity <span style="color: red">*</span></th>
                                                 <th>Price (With VAT & IT) <span style="color: red">*</span></th>
                                                 <th class="text-center">Action</th>

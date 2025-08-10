@@ -133,9 +133,9 @@ class RequisitionController extends Controller
     public function store(Request $request)
     {
         //  dd($request);
+        $userid = Auth::user()->id;
         $request->validate([
                 'requisitiondate' => 'required|date',
-                'requisitionby' => 'required|integer',
                 'reqpurpose' => 'nullable|string',
                 'divisionid' => 'required|integer',
                 'projectno' => 'required|string',
@@ -152,11 +152,11 @@ class RequisitionController extends Controller
 
 
         try {
-            DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request, $userid) {
                 // Insert into master
                 $requisition = RequisitionInfo::create([
                     'requisitiondate' => $request->requisitiondate,
-                    'requisitionby' => $request->requisitionby,
+                    'requisitionby' => $userid,
                     'divisionid' => $request->divisionid,
                     'projectno' => $request->projectno,
                     'status' => 1,
@@ -188,7 +188,7 @@ class RequisitionController extends Controller
                 $appflow->submitdate = Carbon::now()->toDateString();
                 $appflow->statusid = 1;
                 $appflow->approvalpathid = 1;
-                $appflow->fromauthorid = Auth::user()->id;
+                $appflow->fromauthorid =  $userid;
                 $appflow->toauthorid = 3;
                 $appflow->comments = "";
                 $appflow->iscurrentflow = true;
@@ -282,7 +282,7 @@ class RequisitionController extends Controller
             $toauthorid = 3;
             $statusid = 2;
             $appverpathid = 2;
-            $toemail = null;
+            // $toemail = null;
             $toemail = User::where('id', $toauthorid)->value('email');
         } elseif ($requisition->status == 2 && $approvalflow->toauthorid = $user->id) {
             // dump($user->user_name);
