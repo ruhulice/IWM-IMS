@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\MailNotification;
 use App\Models\ApprovalFlow;
 use App\Models\Category;
 use App\Models\Condition;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use SebastianBergmann\CodeCoverage\Driver\Selector;
 
 class RequisitionController extends Controller
 {
@@ -261,26 +264,45 @@ class RequisitionController extends Controller
         $toauthorid = $user->id;
         $statusid = 1;
         $appverpathid = 1;
+        $reqemail = DB::table('users as u')
+            ->join('approvalflow as af', 'u.id', '=', 'af.fromauthorid')
+            ->where('u.id', $approvalflow->fromauthorid)
+            ->where('af.approvalpathid', 1)
+            ->value('u.email');
+        // dd($reqemail);
+        $manageremail = DB::table('users as u')
+            ->join('approvalflow as af', 'u.id', '=', 'af.toauthorid')
+            ->where('u.id', $approvalflow->toauthorid)
+            ->where('af.approvalpathid', 1)
+            ->value('u.email');
+        //dd($manageremail);
+
         if ($requisition->status == 1 && $approvalflow->toauthorid = $user->id) {
-            //dump($user->user_name);
+            // dd($toemail);
             $toauthorid = 3;
             $statusid = 2;
             $appverpathid = 2;
+            $toemail = null;
+            $toemail = User::where('id', $toauthorid)->value('email');
         } elseif ($requisition->status == 2 && $approvalflow->toauthorid = $user->id) {
             // dump($user->user_name);
+            $toemail = User::where('id', $approvalflow->toauthorid)->value('email');
             $toauthorid = 6;
             $statusid = 3;
             $appverpathid = 3;
+            $toemail = User::where('id', $toauthorid)->value('email');
         } elseif ($requisition->status == 3 && $approvalflow->toauthorid = $user->id) {
             // dump($user->user_name);
             $toauthorid = 6;
             $statusid = 4;
             $appverpathid = 4;
+            $toemail = User::where('id', $toauthorid)->value('email');
         } elseif ($requisition->status == 4 && $approvalflow->toauthorid = $user->id) {
             // dump($user->user_name);
             $toauthorid = 5;
             $statusid = 5;
             $appverpathid = 5;
+            $toemail = User::where('id', $toauthorid)->value('email');
         }
         // Update Requisitioninfo
         $requisition->status =  $statusid ;
@@ -288,7 +310,7 @@ class RequisitionController extends Controller
         //Update Approval Flow
         $approvalflow->iscurrentflow = false;
         $approvalflow->save();
-        //dd($id);
+
         $appflow = new ApprovalFlow();
         $appflow->documenttypeid = 1;
         $appflow->documentid = $requisition->id;
@@ -302,8 +324,25 @@ class RequisitionController extends Controller
         $appflow->comments = $request->approver_comment;
         $appflow->iscurrentflow = true;
         $appflow->save();
+        // Prepare email details
+        // Prepare email details
+        $details = [
+            'title' => 'Requisition approval Pending',
+            //'body'  => 'Hello, your request #' . $id . ' was approved successfully.'
+            'body'  => 'You have a pending request http://127.0.0.1:8005/admin/requisitions/'.$id . ' for approval'
+        ];
+
+        // Send plain text email
+        Mail::raw($details['body'], function ($message) use ($toemail, $reqemail, $manageremail) {
+            $message->to($toemail)
+                    ->cc([$reqemail,$manageremail, 'ruh@iwmbd.org'])
+                    ->subject('Approval Notification');
+        });
 
         return redirect()->route('admin.requisitions.index')->with(['message' => 'Equipment transfer updated successfully.']);
+
+
+        // return redirect()->back()->with('success', 'Data approved and email sent!');
     }
 
     public function show($id)
