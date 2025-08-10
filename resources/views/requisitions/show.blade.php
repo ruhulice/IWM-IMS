@@ -44,7 +44,7 @@
                             <th>Category</th>
                             <th>Subcategory</th>
                             <th>Technical Specification</th>
-                            <th>Rate</th>
+                            <th>Rate(Approx.)</th>
                             <th>Quantity</th>
                             <th>UoM</th>
                             <th>Price(with VAT & IT)</th>

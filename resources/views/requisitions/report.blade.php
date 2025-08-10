@@ -102,11 +102,12 @@
             <p>Sl No. <strong>{{ $items[0]->id }}</strong></p>
         </div>
         <div class="content">
-            <p><strong>TO:</strong> DED</p>
+            <p><strong>TO: </strong>Executive Director</p>
+            <p><strong>Through:</strong> DED (Operation)</p>
             <p><strong>Through:</strong> Director, {{ $items[0]->divisionname }} Division</p>
             <p><strong>From:</strong> {{ $items[0]->name }}</p>
-            <p><strong>Subject:</strong> Procuring items for {{ $items[0]->divisionname }} Division from
-                Project-{{ $items[0]->projectno }}</p>
+            <p><strong>Subject:</strong> Procuring items for <strong>{{ $items[0]->divisionname }} </strong>Division
+                from Project No: <strong>{{ $items[0]->projectno }}</strong></p>
             <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($items[0]->requisitiondate)->format('d M Y') }}</p>
             <br>
             <hr>
@@ -122,7 +123,7 @@
                     <th>Category</th>
                     <th>Sub Category</th>
                     <th>Technical Specification</th>
-                    <th>Rate</th>
+                    <th>Rate(Approx.)</th>
                     <th>Quantity</th>
                     <th>Price (incl. VAT & IT)</th>
                 </tr>
@@ -165,9 +166,12 @@
                 @foreach ($approvalFlows as $flow)
                     <div style="min-width: 50px;">
                         <p>{{ $flow->status }} By</p>
-                        <hr>
+                        <br>
                         <p class="text-center">{{ $flow->name }} ({{ $flow->user_name }})</p>
                         <p>{{ $flow->submitdate }}</p>
+                        <hr>
+                        <p class="text-center"><strong>{{ $flow->designation }}</strong></p>
+
                     </div>
                 @endforeach
             </div>

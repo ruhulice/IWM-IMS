@@ -141,7 +141,7 @@
                                     <th>Status</th>
                                     <th>Division</th>
                                     <th>Project</th>
-                                    <th>Rate</th>
+                                    <th>Rate(Approx.)</th>
                                     <th>Quantity</th>
                                     <th>UOM</th>
                                     <th>Price(with VAT & IT)</th>

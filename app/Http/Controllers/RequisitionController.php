@@ -89,47 +89,6 @@ class RequisitionController extends Controller
         }
 
         $requisitions = $query->orderBy('reqi.id', 'desc')->get();
-        //dd($requisitions);
-        // $statusid=1;
-        // if($Loginuser->user_name=="MMM"){
-        //     $statusid=1;
-        // }else if ($Loginuser->user_name=="ALD"){
-        //     $statusid=2;
-        // }else if ($Loginuser->user_name=="MAI"){
-        //     $statusid=3;
-        // }else if ($Loginuser->user_name=="SMR"){
-        //     $statusid=4;
-        // }else if ($Loginuser->user_name=="RUH"){
-        //     $statusid in [1,2,3,4,5];
-        // }
-        // $requisitions = DB::table('requisitioninfo as reqi')
-        //   ->join('requisitiondetails as reqd', 'reqi.id', '=', 'reqd.requisitionid')
-        //   ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
-        //   ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
-        //   ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
-        //   ->join('division as d', 'reqi.divisionid', '=', 'd.divid') // ✅ fixed here
-        //   ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
-        //   ->select(
-        //       'reqi.id',
-        //       'reqi.requisitionby',
-        //       'u.name',
-        //       'reqi.requisitiondate',
-        //       'reqi.status as status_id',
-        //       's.status as status',
-        //       'reqi.reqpurpose',
-        //       'reqi.divisionid',
-        //       'd.divisionname',
-        //       'reqi.projectno',
-        //       'reqd.categoryid',
-        //       'c.categoryname',
-        //       'reqd.subcategoryid',
-        //       'sc.subcategoryname',
-        //       'reqd.techspecification',
-        //       'reqd.rate',
-        //       'reqd.quantity',
-        //       'reqd.uom',
-        //       'reqd.price'
-        //   )->where('reqi.status', $statusid) ->orderBy('reqi.id', 'desc') ->get();
 
         return view('requisitions.index', compact('users', 'category', 'requisitions', 'statues'));
     }
@@ -271,9 +230,6 @@ class RequisitionController extends Controller
             return back()->with('error', 'Failed to save requisition: ' . $e->getMessage());
         }
 
-
-
-
     }
 
     public function edit($id)
@@ -388,7 +344,6 @@ class RequisitionController extends Controller
             ->first();
         //dd($pdf);
 
-
         return view('requisitions.show', compact('requisitions', 'pdf'));
     }
 
@@ -452,6 +407,7 @@ class RequisitionController extends Controller
                 'af.fromauthorid',
                 'u.user_name',
                 'u.name',
+                'u.designation',
                 'af.statusid',
                 's.status',
                 'af.submitdate',
