@@ -114,6 +114,8 @@ Route::group(['prefix' => 'admin','as' => 'admin.','middleware' => ['auth','role
 });
 
 Route::get('admin/requisitions/report/{id}', 'RequisitionController@report')->name('requisitions.report');
+//Data Transfer
+Route::get('admin/transferdata', 'DataTransferController@transfer');
 
 
 
@@ -123,31 +125,7 @@ Route::get('/bd-district-list', [RequisitionController::class, 'getProjects']);
 //Route::get('/bd-district-list', [RequisitionController::class, 'getCategory']);
 Route::get('/get-equipments-by-subcategory', [RequisitionController::class, 'getSubCategory']);
 
-
-
-// // start added by ADS
-
-// Route::prefix('report')->group(function (){
-//      Route::get('/division-landuse', 'ReportingController@DivisionLanduse');
-//      Route::get('/district-landuse', 'ReportingController@DistrictLanduse');
-//      Route::get('/upazilla-landuse', 'ReportingController@UpazillaLanduse');
-
-//      Route::get('/division-landuse/json/{areacode?}', 'ReportingController@DivisionLanduseJson');
-//      Route::get('/district-landuse/json/{areacode?}', 'ReportingController@DistrictLanduseJson');
-//      Route::get('/upazilla-landuse/json/{areacode?}', 'ReportingController@UpazillaLanduseJson');
-
-//      Route::get('/division-zoning', 'ReportingController@DivisionZoning');
-//      Route::get('/district-zoning', 'ReportingController@DistrictZoning');
-//      Route::get('/upazilla-zoning', 'ReportingController@UpazillaZoning');
-
-//      Route::get('/division-zoning/json/{areacode?}', 'ReportingController@DivisionZoningJson');
-//      Route::get('/district-zoning/json/{areacode?}', 'ReportingController@DistrictZoningJson');
-//      Route::get('/upazilla-zoning/json/{areacode?}', 'ReportingController@UpazillaZoningJson');
-
-
-// });
-// // end added by ADS
-
+//earlier
 Route::group(['middleware' => ['auth','checkPermission']], function () {
     //    Route::get('/test/abc', 'PermissionController@test');
 
@@ -156,3 +134,7 @@ Route::group(['middleware' => ['auth','checkPermission']], function () {
 Route::fallback(function () {
     return redirect('/dashboard')->with(['message' => 'Page does not exist !!!', 'alert-type' => 'error']);
 });
+//end earliar
+
+//Data Transfer
+Route::get('/transferdata', 'DataTransferController@transfer');

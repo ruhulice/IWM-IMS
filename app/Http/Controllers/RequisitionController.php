@@ -60,7 +60,7 @@ class RequisitionController extends Controller
             ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
             ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
             ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
-            ->join('division as d', 'reqi.divisionid', '=', 'd.divid')
+            ->join('division as d', 'reqi.divisionid', '=', 'd.divisionid')
             ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
             ->select(
                 'reqi.id',
@@ -352,7 +352,7 @@ class RequisitionController extends Controller
              ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
              ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
              ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
-             ->join('division as d', 'reqi.divisionid', '=', 'd.divid')
+             ->join('division as d', 'reqi.divisionid', '=', 'd.divisionid')
              ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
              ->select(
                  'reqi.id',
@@ -401,7 +401,9 @@ class RequisitionController extends Controller
     }
     public function getProjects(Request $request)
     {
+        //return($request->division_code);
         $projects = Project::whereIn('projecttypeid', [2,4])->where('divisionid', $request->division_code)->pluck('projectno', 'projecttitle');
+        // $projects = Project::where('divisionid', $request->division_code)->pluck('projectno', 'projecttitle');
         return response()->json($projects);
 
     }
@@ -413,7 +415,7 @@ class RequisitionController extends Controller
             ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
             ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
             ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
-            ->join('division as d', 'reqi.divisionid', '=', 'd.divid') // ✅ fixed here
+            ->join('division as d', 'reqi.divisionid', '=', 'd.divisionid') // ✅ fixed here
             ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
             ->select(
                 'reqi.id',

@@ -11,13 +11,13 @@ class Project extends Model
 {
     use Notifiable;
 
-    protected $table = 'project';
+    protected $table = 'projectinfo';
 
-    public $timestamps = true;
+    public $timestamps = false;
 
     protected $guarded = [];
 
-    // protected $fillable = ['title', 'code', 'project_no', 'assign_ps_name', 'assign_pl_name', 'client_name', 'client_org_name', 'submission_type_name', 'submission_date', 'association', 
+    // protected $fillable = ['title', 'code', 'project_no', 'assign_ps_name', 'assign_pl_name', 'client_name', 'client_org_name', 'submission_type_name', 'submission_date', 'association',
     // 'partner_jv_share', 'share', 'budget', 'tech_score', 'fin_score', 'total_score', 'remarks', 'attach_file', 'attach_photo', 'request_ip', 'status', 'status_id', 'created_by', 'updated_by'];
 
     // public function statusName()

@@ -58,7 +58,7 @@
                                                     onchange="getDistrictListByDivCode()" required>
                                                     <option value="">Select One</option>
                                                     @foreach ($divisions as $item)
-                                                        <option value="{{ $item->divid }}">{{ $item->divisionname }}
+                                                        <option value="{{ $item->divisionid }}">{{ $item->divisionname }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -150,7 +150,7 @@
 
         function getDistrictListByDivCode() {
             let division_code = $('#divisionid').val();
-            // console.log(division_code);
+            //console.log(division_code);
             $.ajax({
                 type: "GET",
                 url: "/bd-district-list",
@@ -159,9 +159,11 @@
                 },
                 dataType: "json",
                 success: function(response) {
+                    //console.log(response);
                     $('#projectno').empty().append('<option value="">Select One</option>');
-                    $.each(response, function(key, value) {
-                        $('#projectno').append(`<option value="${value}">${value}-${key}</option>`);
+                    $.each(response, function(projectTitle, projectno) {
+                        $('#projectno').append(
+                            `<option value="${projectno}">${projectno}-${projectTitle}</option>`);
                     });
                 }
             });
