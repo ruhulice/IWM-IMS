@@ -34,3 +34,4 @@ composer.lock
 *.bak
 *.tmp
 *.swp
+* text=auto
