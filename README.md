@@ -1,12 +1,13 @@
 # IWM Integrated Management System (IWM-IMS)
 
-A web-based Laravel application using PostgreSQL.
+A web-based Laravel application using PostgreSQL and MS SQL Server.
 
 ## Requirements
 
 - PHP <= 8.1
 - Laravel Framework=8.83.27
 - PostgreSQL >= 14
+- MS SQL Server 2019
 - Composer
 - Node.js & NPM (optional)
 - Geo server API Connection
