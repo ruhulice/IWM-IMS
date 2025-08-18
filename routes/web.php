@@ -110,18 +110,16 @@ Route::group(['prefix' => 'admin','as' => 'admin.','middleware' => ['auth','role
     // Route::get('requisitions/report/{id}', 'RequisitionController@report')->name('requisitions.report');
     Route::put('admin/requisitions/{id}', 'RequisitionController@update')->name('admin.requisitions.update');
 
-
 });
 
 Route::get('admin/requisitions/report/{id}', 'RequisitionController@report')->name('requisitions.report');
 //Data Transfer
-Route::get('admin/transferprojectinfo', 'DataTransferController@transfer');
+Route::get('admin/transferprojectinfo', 'DataTransferController@transferprojectinfo');
 Route::get('admin/transferprojectbudget', 'DataTransferController@transferprojectbudget');
 Route::get('admin/transferprojectbudgetdetails', 'DataTransferController@transferprojectbudgetdetails');
 Route::get('admin/transferchartofaccount', 'DataTransferController@transferchartofaccount');
 Route::get('admin/transferemployeeinfo', 'DataTransferController@transferemployeeinfo');
 Route::get('admin/transferdesignation', 'DataTransferController@transferdesignation');
-
 
 
 // category and subcategory list dropdown

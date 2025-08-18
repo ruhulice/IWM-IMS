@@ -14,7 +14,7 @@ class DataTransferController extends Controller
     //     $this->middleware('auth');
     // }
 
-    public function transfer()
+    public function transferprojectinfo()
     {
         //dd("Ok");
         // Fetch from MS SQL Server

@@ -401,8 +401,16 @@ class RequisitionController extends Controller
     }
     public function getProjects(Request $request)
     {
-        //return($request->division_code);
-        $projects = Project::whereIn('projecttypeid', [2,4])->where('divisionid', $request->division_code)->pluck('projectno', 'projecttitle');
+        $projects = Project::whereIn('projecttypeid', [2, 4])
+        //->where('expectedenddate', '>=', Carbon::parse('2025-08-11'))
+         ->where('expectedenddate', '>=', Carbon::now()->format('Y-m-d'))
+        ->where('divisionid', $request->division_code)
+        ->pluck('projectno', 'projecttitle');
+        // $projects = Project::whereIn('projecttypeid', [2, 4])
+        // ->where('divisionid', $request->division_code)
+        // ->where('ExpectedEndDate', '>=', Carbon::now()->format('Y-m-d'))
+        // ->pluck('projecttitle', 'projectno');
+        //return $projects;
         // $projects = Project::where('divisionid', $request->division_code)->pluck('projectno', 'projecttitle');
         return response()->json($projects);
 
