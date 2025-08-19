@@ -98,7 +98,7 @@
             <img src="{{ asset('assets/landing/images/iwm2024.png') }}" alt="Logo">
             <h1>INSTITUTE OF WATER MODELLING</h1>
             <p>IWM BHABAN, House 06, Road 3C, Block H, Sector 15, Uttara, Dhaka 1230, Bangladesh</p>
-            <p><strong>Requisition (User's Copy)</strong></p>
+            <p><strong>Internal Memo</strong></p>
             <p>Sl No. <strong>{{ $items[0]->id }}</strong></p>
         </div>
         <div class="content">
@@ -112,7 +112,7 @@
             <br>
             <hr>
             <br>
-            <p><strong>Purpose of Requisition:</strong> {{ $items[0]->reqpurpose }}</p>
+            <p><strong>Purpose of Memo:</strong> {{ $items[0]->reqpurpose }}</p>
             <br>
         </div>
 
@@ -123,7 +123,7 @@
                     <th>Category</th>
                     <th>Sub Category</th>
                     <th>Technical Specification</th>
-                    <th>Rate(Approx.)</th>
+                    <th>Unit Price(Approx.)</th>
                     <th>Quantity</th>
                     <th>Price (incl. VAT & IT)</th>
                 </tr>

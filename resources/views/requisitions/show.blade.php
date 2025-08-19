@@ -21,10 +21,11 @@
         <!-- Requisition Info -->
         <div class="content mb-3">
             <div class="row">
-                <div class="col-md-4"><strong>Requisition No:</strong> {{ $requisitions[0]->id }}</div>
+                <div class="col-md-4"><strong>Memo No:</strong> {{ $requisitions[0]->id }}</div>
                 <div class="col-md-4"><strong>Date:</strong>
-                    {{ \Carbon\Carbon::parse($requisitions[0]->requisitiondate)->format('d M Y') }}</div>
-                <div class="col-md-4"><strong>Requisition By:</strong> {{ $requisitions[0]->name }}</div>
+                    {{ \Carbon\Carbon::parse($requisitions[0]->requisitiondate)->format('d M Y') }}
+                </div>
+                <div class="col-md-4"><strong>Created By:</strong> {{ $requisitions[0]->name }}</div>
             </div>
             <div class="row mt-2">
                 <div class="col-md-4"><strong>Division:</strong> {{ $requisitions[0]->divisionname }}</div>
@@ -74,31 +75,80 @@
             </div>
         </div>
 
-        <!-- Attached PDF Section -->
-        @if ($pdf && file_exists(public_path('storage/' . $pdf->path)))
-            <div class="content  mt-0">
-                <div class="d-flex align-items-center mb-3">
-                    <p class="mb-0 mr-3">Attached PDF:</p>
+        <!-- Attached Documents Section -->
+        @forelse ($documents ?? [] as $doc)
+            <div class="content mt-3 border p-2 rounded">
+                <div class="d-flex align-items-center mb-2">
+                    <p class="mb-0 mr-3">
+                        Attached {{ $doc->documenttype == 1 ? 'PDF' : 'MSG' }}:
+                    </p>
 
-                    <button class="btn btn-outline-primary mr-3" id="togglePdf">
-                        View / Download attachment
-                    </button>
-
-                    <a href="{{ asset('storage/' . $pdf->path) }}" class="btn btn-secondary" target="_blank">
-                        Download attachment
-                    </a>
+                    @if ($doc->documenttype == 1)
+                        <!-- PDF toggle button -->
+                        <button class="btn btn-outline-primary mr-3 togglePdf" data-target="pdf-{{ $doc->id }}">
+                            View / Download
+                        </button>
+                        <a href="{{ asset('storage/' . $doc->path) }}" class="btn btn-secondary" target="_blank">
+                            Download PDF
+                        </a>
+                    @else
+                        <!-- MSG file download -->
+                        <a href="{{ asset('storage/' . $doc->path) }}" class="btn btn-secondary" download>
+                            Download MSG
+                        </a>
+                    @endif
                 </div>
 
-                <div class="mt-3" id="pdfContainer" style="display: none;">
-                    <embed src="{{ asset('storage/' . $pdf->path) }}" type="application/pdf" width="100%"
-                        height="600px" />
-                </div>
+                @if ($doc->documenttype == 1)
+                    <div class="mt-2 pdfContainer" id="pdf-{{ $doc->id }}" style="display: none;">
+                        <embed src="{{ asset('storage/' . $doc->path) }}" type="application/pdf" width="100%"
+                            height="600px" />
+                    </div>
+                @endif
             </div>
-        @else
+        @empty
             <div class="alert alert-warning mt-4">
-                <i class="fa fa-info-circle"></i> No attachment found for this requisition.
+                <i class="fa fa-info-circle"></i> No attachments found for this requisition.
             </div>
-        @endif
+        @endforelse
+
+        {{-- @forelse ($documents ?? [] as $doc)
+            @if (file_exists(public_path('storage/' . $doc->path)))
+                <div class="content mt-3 border p-2 rounded">
+                    <div class="d-flex align-items-center mb-2">
+                        <p class="mb-0 mr-3">
+                            Attached {{ $doc->documenttype == 1 ? 'PDF' : 'MSG' }}:
+                        </p>
+
+                        @if ($doc->documenttype == 1)
+                            <!-- PDF toggle button -->
+                            <button class="btn btn-outline-primary mr-3 togglePdf" data-target="pdf-{{ $doc->id }}">
+                                View / Download
+                            </button>
+                            <a href="{{ asset('storage/' . $doc->path) }}" class="btn btn-secondary" target="_blank">
+                                Download PDF
+                            </a>
+                        @else
+                            <!-- MSG file download -->
+                            <a href="{{ asset('storage/' . $doc->path) }}" class="btn btn-secondary" download>
+                                Download MSG
+                            </a>
+                        @endif
+                    </div>
+
+                    @if ($doc->documenttype == 1)
+                        <div class="mt-2 pdfContainer" id="pdf-{{ $doc->id }}" style="display: none;">
+                            <embed src="{{ asset('storage/' . $doc->path) }}" type="application/pdf" width="100%"
+                                height="600px" />
+                        </div>
+                    @endif
+                </div>
+            @endif
+        @empty
+            <div class="alert alert-warning mt-4">
+                <i class="fa fa-info-circle"></i> No attachments found for this requisition.
+            </div>
+        @endforelse --}}
 
         <!-- Approval Summary -->
         <div class="content mt-2">
@@ -116,7 +166,7 @@
             <form action="{{ route('admin.requisitions.update', $requisitions[0]->id) }}" method="POST"
                 enctype="multipart/form-data">
                 @csrf
-                @method('PUT') <!-- This is very important for PUT method -->
+                @method('PUT')
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group" style="min-width: 400px;">
@@ -134,7 +184,6 @@
                     </div>
                 </div>
             </form>
-
         </div>
     </div>
 @endsection
@@ -142,16 +191,14 @@
 @section('js_after')
     <script src="{{ asset('assets/js/plugins/bootstrap-select/js/bootstrap-select.min.js') }}"></script>
     <script src="{{ asset('assets/js/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js') }}"></script>
+
     <script>
         function numberToWords(num) {
-            const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
-                'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen',
-                'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen',
+            const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+                'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen',
                 'Nineteen'
             ];
-            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty',
-                'Sixty', 'Seventy', 'Eighty', 'Ninety'
-            ];
+            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
 
             function convert(n) {
                 if (n < 20) return a[n];
@@ -172,20 +219,20 @@
             const inWords = numberToWords(Math.round(total));
             document.getElementById('totalInWords').innerText = inWords;
 
-            const toggleBtn = document.getElementById('togglePdf');
-            const pdfContainer = document.getElementById('pdfContainer');
-
-            if (toggleBtn && pdfContainer) {
-                toggleBtn.addEventListener('click', function() {
+            const toggleButtons = document.querySelectorAll('.togglePdf');
+            toggleButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetId = btn.getAttribute('data-target');
+                    const pdfContainer = document.getElementById(targetId);
                     if (pdfContainer.style.display === 'none') {
                         pdfContainer.style.display = 'block';
-                        toggleBtn.textContent = 'Hide attachment';
+                        btn.textContent = 'Hide PDF';
                     } else {
                         pdfContainer.style.display = 'none';
-                        toggleBtn.textContent = 'View / Download attachment';
+                        btn.textContent = 'View / Download';
                     }
                 });
-            }
+            });
         });
     </script>
 @endsection

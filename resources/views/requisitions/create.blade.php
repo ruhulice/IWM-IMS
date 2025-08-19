@@ -25,7 +25,7 @@
                     <form action="{{ route('admin.requisitions.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="block-header block-header-default">
-                            <h2 class="block-title">Requisition Create</h2>
+                            <h2 class="block-title">Memo Creation</h2>
                             <div class="block-options">
                                 <a class="btn btn-danger" href="{{ route('admin.requisitions.index') }}">Back</a>
                                 <button type="submit" class="btn btn-success">Submit</button>
@@ -77,7 +77,7 @@
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label class="font-weight-bold">Requisition Date <span
+                                                <label class="font-weight-bold">Memo Date <span
                                                         style="color: red">*</span></label>
                                                 <input type="text" class="form-control" id="requisitiondate"
                                                     name="requisitiondate" value="{{ date('Y-m-d') }}" required>
@@ -88,7 +88,7 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-bold">Purpose of Requisition <span
+                                                <label class="font-weight-bold">Purpose of Memo <span
                                                         style="color: red">*</span></label>
                                                 <textarea class="form-control" id="reqpurpose" name="reqpurpose" rows="3" required>{{ old('reqpurpose') }}</textarea>
                                             </div>
@@ -97,7 +97,7 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-bold">Upload PDF</label>
+                                                <label class="font-weight-bold">Upload File</label>
                                                 <input type="file" name="pdffile" id="pdffile"
                                                     class="form-control-file" accept="application/pdf">
                                             </div>
@@ -109,7 +109,7 @@
 
                             <div class="row modify_section">
                                 <div class="col-md-12 d-flex justify-content-between align-items-center">
-                                    <h5>Equipments List</h5>
+                                    <h5>Items List</h5>
                                     <button id="addRow" type="button" class="btn btn-sm btn-success">Add New +</button>
                                 </div>
 
@@ -120,7 +120,7 @@
                                                 <th>Category <span style="color: red">*</span></th>
                                                 <th>Sub Category <span style="color: red">*</span></th>
                                                 <th>Technical Specification <span style="color: red">*</span></th>
-                                                <th>Rate(Approx.) <span style="color: red">*</span></th>
+                                                <th>Unit Price(Approx.) <span style="color: red">*</span></th>
                                                 <th>Quantity <span style="color: red">*</span></th>
                                                 <th>Price (With VAT & IT) <span style="color: red">*</span></th>
                                                 <th class="text-center">Action</th>

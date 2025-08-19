@@ -147,8 +147,10 @@ class RequisitionController extends Controller
                 'price' => 'required|array',
             ]);
         // Validate file
-        $request->validate(['pdffile' => 'mimes:pdf|max:10240',
+        $request->validate([
+            'pdffile' => 'required|mimes:pdf,msg|max:20480' // max 20MB
         ]);
+
 
 
         try {
@@ -195,31 +197,67 @@ class RequisitionController extends Controller
 
                 $appflow->save();
 
-
-                // Save file data and storage PDF
+                // Save file data and storage PDF/MSG
                 if ($request->hasFile('pdffile')) {
                     $file = $request->file('pdffile');
-                    // dd($file);
 
                     if ($file->isValid()) {
+                        // Allowed extensions
+                        $allowedExtensions = ['pdf', 'msg'];
+
+                        // Get file extension
+                        $extension = strtolower($file->getClientOriginalExtension());
+
+                        if (!in_array($extension, $allowedExtensions)) {
+                            return back()->with('error', 'Only PDF and MSG files are allowed.');
+                        }
+
+                        // Unique file name
                         $fileName = time() . '_' . $file->getClientOriginalName();
-                        //dd($fileName);
-                        // Save to storage/app/public/pdfs
+
+                        // Store in storage/app/public/uploads
                         $filePath = $file->storeAs('public/pdfs', $fileName);
+                        //$filePath = $file->storeAs('public/uploads', $fileName);
 
                         // Save path to database
                         $document = new Uploaddocuments();
                         $document->name = $fileName;
                         $document->path = str_replace('public/', '', $filePath);
-                        $document->documenttype = 1;
+                        $document->documenttype = 1; //($extension === 'pdf') ? 1 : 2; // 1=PDF, 2=MSG
                         $document->documentid = $requisition->id;
                         $document->uploadby = $request->requisitionby;
                         $document->uploaddate = Carbon::now();
                         $document->save();
+
                     } else {
                         return back()->with('error', 'Uploaded file is not valid.');
                     }
                 }
+
+                // // Save file data and storage PDF
+                // if ($request->hasFile('pdffile')) {
+                //     $file = $request->file('pdffile');
+                //     // dd($file);
+
+                //     if ($file->isValid()) {
+                //         $fileName = time() . '_' . $file->getClientOriginalName();
+                //         //dd($fileName);
+                //         // Save to storage/app/public/pdfs
+                //         $filePath = $file->storeAs('public/pdfs', $fileName);
+
+                //         // Save path to database
+                //         $document = new Uploaddocuments();
+                //         $document->name = $fileName;
+                //         $document->path = str_replace('public/', '', $filePath);
+                //         $document->documenttype = 1;
+                //         $document->documentid = $requisition->id;
+                //         $document->uploadby = $request->requisitionby;
+                //         $document->uploaddate = Carbon::now();
+                //         $document->save();
+                //     } else {
+                //         return back()->with('error', 'Uploaded file is not valid.');
+                //     }
+                // }
             });
 
 
@@ -376,14 +414,14 @@ class RequisitionController extends Controller
                  'reqd.price'
              )->where('reqi.id', $id)->get();
         //Get attached PDF (if exists)
-        $pdf = DB::table('uploaddocuments')
+        $documents = DB::table('uploaddocuments')
             ->where('documenttype', 1)
             ->where('documentid', $id)
             ->orderByDesc('id')
-            ->first();
+            ->get();
         //dd($pdf);
 
-        return view('requisitions.show', compact('requisitions', 'pdf'));
+        return view('requisitions.show', compact('requisitions', 'documents'));
     }
 
 

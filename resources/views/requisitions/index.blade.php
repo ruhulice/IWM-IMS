@@ -44,7 +44,7 @@
                 <a class="breadcrumb-item" href="{{ url('/dashboard') }}">
                     <i class="fa fa-dashboard"></i> Dashboard
                 </a>
-                <span class="breadcrumb-item active">Requisition Dashboard</span>
+                <span class="breadcrumb-item active">Memo Dashboard</span>
             </nav>
         </div>
     </div>
@@ -54,11 +54,11 @@
     <div class="content wmg-content">
         <div class="block" style="margin-bottom: 0;">
             <div class="block-header block-header-default">
-                <h3>Requisition Dashboard</h3>
+                <h3>Memo Dashboard</h3>
                 <div class="block-options">
                     <a href="{{ route('admin.requisitions.create') }}">
                         <button type="button" class="btn btn-info float-right">
-                            <i class="fa fa-plus"></i> | New Requisition
+                            <i class="fa fa-plus"></i> | New Memo
                         </button>
                     </a>
                 </div>
