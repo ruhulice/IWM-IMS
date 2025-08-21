@@ -102,7 +102,7 @@ Route::group(['prefix' => 'admin','as' => 'admin.','middleware' => ['auth','role
     Route::post('sms-configuration', 'SmsConfigurationController@store')->name('SmsConfiguration.store');
     //RUH
     // Route::resource('itequipments','ITEquipmentController');  // Use Route This way
-    Route::resource('memos', 'MemoController');
+    Route::resource('cs', 'CSController');
     Route::resource('comment', 'CommentController');
     //Requisition
     Route::resource('requisitions', 'RequisitionController');

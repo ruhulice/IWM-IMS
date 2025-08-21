@@ -44,7 +44,7 @@
                 <a class="breadcrumb-item" href="{{ url('/dashboard') }}">
                     <i class="fa fa-dashboard"></i> Dashboard
                 </a>
-                <span class="breadcrumb-item active">Memo Dashboard</span>
+                <span class="breadcrumb-item active">CS Dashboard</span>
             </nav>
         </div>
     </div>
@@ -54,11 +54,11 @@
     <div class="content wmg-content">
         <div class="block" style="margin-bottom: 0;">
             <div class="block-header block-header-default">
-                <h3>Memo Dashboard</h3>
+                <h3>CS Dashboard</h3>
                 <div class="block-options">
-                    <a href="{{ route('admin.requisitions.create') }}">
+                    <a href="{{ route('admin.cs.create') }}">
                         <button type="button" class="btn btn-info float-right">
-                            <i class="fa fa-plus"></i> | New Memo
+                            <i class="fa fa-plus"></i> | New CS
                         </button>
                     </a>
                 </div>
@@ -133,39 +133,41 @@
                                 <tr>
                                     <th>SL</th>
                                     <th>Req Id</th>
+                                    <th>Vendor</th>
                                     <th>Category</th>
                                     <th>Subcategory</th>
                                     <th>Technical Specification</th>
-                                    <th>Req By</th>
-                                    <th>Request Date</th>
+                                    <th>CSBy</th>
+                                    <th>CS Date</th>
                                     <th>Status</th>
                                     <th>Division</th>
                                     <th>Project</th>
-                                    <th>Rate(Approx.)</th>
+                                    <th>Unit Price</th>
                                     <th>Quantity</th>
-                                    <th>UOM</th>
                                     <th>Price(with VAT & IT)</th>
+                                    <th>File</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($requisitions as $key => $item)
+                                @foreach ($csData as $key => $item)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
                                         <td>{{ $item->id }}</td>
+                                        <td>{{ $item->vendorname }}</td>
                                         <td>{{ $item->categoryname }}</td>
                                         <td>{{ $item->subcategoryname }}</td>
                                         <td>{{ $item->techspecification }}</td>
                                         <td class="text-truncate" style="max-width:20px;">{{ $item->user_name }}</td>
-                                        <td class="text-truncate" style="max-width:20px;">
-                                            {{ date('Y-m-d', strtotime($item->requisitiondate)) }}</td>
+                                        <td class="text-truncate" style="max-width:200px;">
+                                            {{ date('Y-m-d', strtotime($item->csdate)) }}</td>
                                         <td class="text-truncate" style="max-width:20px;">{{ $item->status }}</td>
                                         <td class="text-truncate" style="max-width:20px;">{{ $item->divisionname }}</td>
                                         <td class="text-truncate" style="max-width:20px;">{{ $item->projectno }}</td>
-                                        <td>{{ $item->rate }}</td>
+                                        <td>{{ $item->unitprice }}</td>
                                         <td>{{ $item->quantity }}</td>
-                                        <td>{{ $item->uom }}</td>
-                                        <td>{{ $item->price }}</td>
+                                        <td>{{ $item->totalprice }}</td>
+                                        <td class="text-truncate" style="max-width:100px;">{{ $item->filename }}</td>
                                         <td>
                                             <div class="btn-group">
                                                 <a href="{{ route('admin.requisitions.edit', $item->id) }}"

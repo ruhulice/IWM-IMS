@@ -66,6 +66,7 @@ class RequisitionController extends Controller
                 'reqi.id',
                 'reqi.requisitionby',
                 'u.name',
+                'u.user_name',
                 'reqi.requisitiondate',
                 'reqi.status as status_id',
                 's.status as status',

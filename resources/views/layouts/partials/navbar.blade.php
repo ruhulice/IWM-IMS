@@ -82,16 +82,22 @@
             <i class="fa fa-desktop"></i><span class="sidebar-mini-hide"> IT Equipments</span>
         </a>
         <ul>
-            {{-- <li>
-                 <a class="{{ request()->is('admin/memos') ? ' active' : '' }}" href="{{ route('admin.memos.index') }}">Meno Management</a>
-            </li> --}}
+
             <li>
                 <a class="{{ request()->is('admin/requisitions') ? ' active' : '' }}"
                     href="{{ route('admin.requisitions.index') }}">Memo Management</a>
             </li>
             <li>
+                <a class="{{ request()->is('admin/cs') ? ' active' : '' }}"
+                    href="{{ route('admin.cs.index') }}">Comparative Statement (CS)</a>
+            </li>
+            <li>
                 <a class="{{ request()->is('admin/comment') ? ' active' : '' }}"
-                    href="{{ route('admin.comment.index') }}">Approval Management</a>
+                    href="{{ route('admin.comment.index') }}">Work Order</a>
+            </li>
+            <li>
+                <a class="{{ request()->is('admin/comment') ? ' active' : '' }}"
+                    href="{{ route('admin.comment.index') }}">Delivery</a>
             </li>
         </ul>
     </li>
