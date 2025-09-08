@@ -112,84 +112,6 @@ class CSController extends Controller
         $users = User::all();
         return view('cs.create', compact('users', 'category', 'divisions', 'vendor'));
     }
-    // public function store(Request $request)
-    // {
-    //     //  dd($request);
-    //     $userid = Auth::user()->id;
-    //     try {
-    //         DB::transaction(function () use ($request, $userid) {
-    //             // Insert into master (csinfo)
-    //             $csinfo = CSInfo::create([
-    //                 'csdate'      => $request->csdate,
-    //                 'csby'        => $userid,
-    //                 'divisionid'  => $request->divisionid,
-    //                 'projectno'   => $request->projectno,
-    //                 'categoryid'        => $request->categoryid,
-    //                 'subcategoryid'     => $request->subcategoryid,
-    //                 'status'      => 1,
-    //                 'reqpurpose'  => $request->reqpurpose,
-    //                 //'created_at'  => now(),
-    //             ]);
-
-    //             // Insert into child table (csdetails)
-    //             foreach ($request->categoryid as $key => $value) {
-
-    //                 $fileName = null;
-    //                 $filePath = null;
-
-    //                 // Validate all files before loop
-    //                 $request->validate([
-    //                     'pdffile.*' => 'nullable|mimes:pdf|max:20480' // max 20MB per file
-    //                 ]);
-
-    //                 // Handle file if exists for this row
-    //                 if ($request->hasFile('pdffile') && isset($request->file('pdffile')[$key])) {
-    //                     $file = $request->file('pdffile')[$key];
-
-    //                     $fileName = time() . '_' . $file->getClientOriginalName();
-
-    //                     // Store in storage/app/public/csfiles
-    //                     $filePath = $file->storeAs('csfiles', $fileName, 'public');
-    //                 }
-
-
-    //                 // dd($fileName);
-    //                 // dd($filePath);
-
-    //                 // First insert without documentid
-    //                 $csDetail = CSDetails::create([
-    //                     'csid'              => $csinfo->id,
-    //                     'vendorid'          => $request->vendorid[$key] ?? null,
-    //                     'techspecification' => $request->techspecification[$key],
-    //                     'unitprice'         => $request->rate[$key],
-    //                     'quantity'          => $request->quantity[$key],
-    //                     'subtotal'          => $request->quantity[$key] * $request->rate[$key],
-    //                     'totalprice'        => $request->price[$key],
-    //                     'remarks'           => $request->remarks[$key] ?? null,
-    //                     'filename'          => $fileName,
-    //                     'filepath'          => $filePath,
-    //                     'documenttype'      => 2,
-    //                     'uploaddate'        => now(),
-    //                     'uploadby'          => auth()->id(),
-    //                     //'created_at'        => now(),
-    //                 ]);
-
-    //                 // Now update its own documentid
-    //                 $csDetail->update([
-    //                     'documentid' => $csDetail->id,
-    //                 ]);
-    //             }
-    //         });
-
-    //         return redirect()->route('admin.cs.index')
-    //             ->with('success', 'Requisition created successfully.');
-
-    //     } catch (\Exception $e) {
-    //         Log::error('Requisition creation failed: ' . $e->getMessage());
-
-    //         return back()->with('error', 'Failed to save requisition: ' . $e->getMessage());
-    //     }
-    // }
 
     public function store(Request $request)
     {
@@ -271,6 +193,22 @@ class CSController extends Controller
 
             return back()->with('error', 'Failed to save requisition: ' . $e->getMessage());
         }
+    }
+    public function edit(Request $request)
+    {
+        dd($request);
+
+        return redirect()->route('admin.cs.index')
+                            ->with('success', 'Requisition updated successfully.');
+
+    }
+    public function update(Request $request)
+    {
+        dd($request);
+
+        return redirect()->route('admin.cs.index')
+                            ->with('success', 'Requisition updated successfully.');
+
     }
 
 
