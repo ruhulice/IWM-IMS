@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApprovalFlow;
 use App\Models\Category;
 use App\Models\CSDetails;
 use App\Models\CSInfo;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class CSController extends Controller
 {
@@ -80,7 +82,7 @@ class CSController extends Controller
                 'c2.documenttype',
                 'c2.documentid',
                 'c2.uploaddate'
-            );
+            )->where('vtype', 'IT');
 
         // Apply status filter
         if (!empty($statusidList)) {
@@ -104,7 +106,7 @@ class CSController extends Controller
         // dd("Create");
         $category = Category::whereIn('categoryid', ['CM','CP','CS','CE','CA'])->get();
         $divisions  = Division::all();
-        $vendor = Vendor::all();
+        $vendor =  Vendor::where('vtype', 'IT') ->orderBy('vendorname', 'asc')->get();
 
         // $users      = User::select('users.*')->leftJoin('user_roles', 'users.id', '=', 'user_roles.user_id')->where('user_roles.role_id', 5)->where('users.is_active', true)->get();
 
@@ -175,15 +177,31 @@ class CSController extends Controller
                         'documenttype'      => 2,
                         'uploaddate'        => now(),
                         'uploadby'          => $userid,
+                        'documentid' => $csinfo->id,
                     ]);
 
-                    // Update documentid to its own ID
-                    $csDetail->update([
-                        'documentid' => $csDetail->id,
-                    ]);
+                    // // Update documentid to its own ID
+                    // $csDetail->update([
+                    //     'documentid' => $csDetail->id,
+                    // ]);
                 }
+                // Approval Flow insert
+                $appflow = new ApprovalFlow();
+                $appflow->documenttypeid = 2;
+                $appflow->documentid = $csinfo->id;
+                $appflow->projectno = $csinfo->projectno;
+                $appflow->submitdate = Carbon::now()->toDateString();
+                $appflow->statusid = 1;
+                $appflow->approvalpathid = 1;
+                $appflow->fromauthorid =  $userid;
+                $appflow->toauthorid = 3;
+                $appflow->comments = "";
+                $appflow->iscurrentflow = true;
+
+                $appflow->save();
 
             });
+
 
             return redirect()->route('admin.cs.index')
                              ->with('success', 'Requisition created successfully.');
@@ -194,20 +212,200 @@ class CSController extends Controller
             return back()->with('error', 'Failed to save requisition: ' . $e->getMessage());
         }
     }
-    public function edit(Request $request)
+    public function show($id)
     {
-        dd($request);
+        $csdata = DB::table('csinfo as c')
+        ->join('csdetails as cd', 'c.id', '=', 'cd.csid')
+        ->join('catagory as c2', 'c.categoryid', '=', 'c2.id')
+        ->join('subcategory as s', 'c.subcategoryid', '=', 's.id')
+        ->join('division as d', 'c.divisionid', '=', 'd.divisionid')
+        ->join('users as u', 'c.csby', '=', 'u.id')
+        ->join('vendor as v', 'cd.vendorid', '=', 'v.id')
+        ->join('statuses as s2', 'c.status', '=', 's2.id')
+        ->where('c.id', $id)
+        ->select(
+            'c.id',
+            'u.user_name',
+            'c.csdate',
+            's2.status',
+            'd.divisionname',
+            'c.projectno',
+            'c.reqpurpose',
+            'c2.categoryname',
+            's.subcategoryname',
+            'v.vendorname',
+            'cd.techspecification',
+            'cd.unitprice',
+            'cd.quantity',
+            'cd.totalprice',
+            'c.reqpurpose',
+            'cd.filename',
+            'cd.filepath',
+            'cd.documenttype',
+            'cd.documentid',
+            'cd.uploadby'
+        )
+        ->get();
 
-        return redirect()->route('admin.cs.index')
-                            ->with('success', 'Requisition updated successfully.');
+        // dd($csdata);
+
+        return view('cs.show', compact('csdata'));
+        // dd($id);
+        // return  redirect()->route('admin.cs.index')->with('success', 'Show CS ');
+    }
+    public function update(Request $request, $id)
+    {
+        //dd($id);
+        $csinfo = CSInfo::where('id', $id)->first();
+        $approvalflow = ApprovalFlow::where('documentid', $id) ->where('documenttypeid', 2)
+                        ->where('iscurrentflow', true)->first();
+        //dd($approvalflow);
+        $user = Auth::user();
+        //dd($csinfo);
+        // Determine the next approver and status
+        $toauthorid = $user->id;
+        $statusid = 1;
+        $appverpathid = 1;
+        $reqemail = DB::table('users as u')
+            ->join('approvalflow as af', 'u.id', '=', 'af.fromauthorid')
+            ->where('u.id', $approvalflow->fromauthorid)
+            ->where('af.approvalpathid', 1)
+            ->value('u.email');
+        // dd($reqemail);
+        $manageremail = DB::table('users as u')
+            ->join('approvalflow as af', 'u.id', '=', 'af.toauthorid')
+            ->where('u.id', $approvalflow->toauthorid)
+            ->where('af.approvalpathid', 1)
+            ->value('u.email');
+        //dd($manageremail);
+
+        if ($csinfo->status == 1 && $approvalflow->toauthorid = $user->id) {
+            // dd($toemail);
+            $toauthorid = 3;
+            $statusid = 2;
+            $appverpathid = 2;
+            // $toemail = null;
+            $toemail = User::where('id', $toauthorid)->value('email');
+        } elseif ($csinfo->status == 2 && $approvalflow->toauthorid = $user->id) {
+            // dump($user->user_name);
+            $toemail = User::where('id', $approvalflow->toauthorid)->value('email');
+            $toauthorid = 6;
+            $statusid = 3;
+            $appverpathid = 3;
+            $toemail = User::where('id', $toauthorid)->value('email');
+        } elseif ($csinfo->status == 3 && $approvalflow->toauthorid = $user->id) {
+            // dump($user->user_name);
+            $toauthorid = 6;
+            $statusid = 4;
+            $appverpathid = 4;
+            $toemail = User::where('id', $toauthorid)->value('email');
+        } elseif ($csinfo->status == 4 && $approvalflow->toauthorid = $user->id) {
+            // dump($user->user_name);
+            $toauthorid = 5;
+            $statusid = 5;
+            $appverpathid = 5;
+            $toemail = User::where('id', $toauthorid)->value('email');
+        }
+        // Update Requisitioninfo
+        $csinfo->status =  $statusid ;
+        $csinfo->save();
+        //Update Approval Flow
+        $approvalflow->iscurrentflow = false;
+        $approvalflow->save();
+
+        $appflow = new ApprovalFlow();
+        $appflow->documenttypeid = 2;
+        $appflow->documentid = $csinfo->id;
+        $appflow->projectno = $csinfo->projectno;
+        $appflow->submitdate = Carbon::now()->toDateString();
+        $appflow->statusid = $statusid;
+        $appflow->approvalpathid =  $appverpathid;
+        $appflow->fromauthorid = Auth::user()->id;
+        $appflow->toauthorid = $toauthorid;
+        $appflow->approvedate = Carbon::now();
+        $appflow->comments = $request->approver_comment;
+        $appflow->iscurrentflow = true;
+        $appflow->save();
+        // Prepare email details
+        // Prepare email details
+        $details = [
+            'title' => 'CS approval Pending',
+            //'body'  => 'Hello, your request #' . $id . ' was approved successfully.'
+            'body'  => 'You have a pending request http://127.0.0.1:8001/admin/cs/'.$id . ' for approval'
+        ];
+
+        // Send plain text email
+        Mail::raw($details['body'], function ($message) use ($toemail, $reqemail, $manageremail) {
+            $message->to($toemail)
+                    ->cc([$reqemail,$manageremail, 'ruh@iwmbd.org'])
+                    ->subject('CS Approval Notification');
+        });
+
+        return redirect()->route('admin.cs.index')->with(['message' => 'Equipment transfer updated successfully.']);
 
     }
-    public function update(Request $request)
+    public function report($id)
     {
-        dd($request);
+        // dd($id);
 
-        return redirect()->route('admin.cs.index')
-                            ->with('success', 'Requisition updated successfully.');
+        $items = DB::table('csinfo as c')
+        ->join('csdetails as cd', 'c.id', '=', 'cd.csid')
+        ->join('catagory as c2', 'c.categoryid', '=', 'c2.id')
+        ->join('subcategory as s', 'c.subcategoryid', '=', 's.id')
+        ->join('division as d', 'c.divisionid', '=', 'd.divisionid')
+        ->join('users as u', 'c.csby', '=', 'u.id')
+        ->join('vendor as v', 'cd.vendorid', '=', 'v.id')
+        ->join('statuses as s2', 'c.status', '=', 's2.id')
+        ->where('c.id', $id)
+        ->select(
+            'c.id',
+            'u.user_name',
+            'u.name',
+            'c.csdate',
+            's2.status',
+            'd.divisionname',
+            'c.projectno',
+            'c.reqpurpose',
+            'c2.categoryname',
+            's.subcategoryname',
+            'v.vendorname',
+            'cd.techspecification',
+            'cd.unitprice',
+            'cd.quantity',
+            'cd.totalprice',
+            'c.reqpurpose',
+            'cd.filename',
+            'cd.filepath',
+            'cd.documenttype',
+            'cd.documentid',
+            'cd.uploadby'
+        )
+        ->get();
+
+
+        //Approval flow
+        $approvalFlows = DB::table('approvalflow as af')
+            ->join('users as u', 'af.fromauthorid', '=', 'u.id')
+            ->join('statuses as s', 'af.statusid', '=', 's.id')
+            ->select(
+                'af.id',
+                'af.fromauthorid',
+                'u.user_name',
+                'u.name',
+                'u.designation',
+                'af.statusid',
+                's.status',
+                'af.submitdate',
+                'af.approvalpathid'
+            )
+            ->where('af.documentid', $id)
+            ->where('af.statusid', '<>', 1)
+            ->orderBy('af.id', 'asc')
+            ->get();
+
+
+        //return view('gate_pass.gate_pass_print', compact('items'));
+        return view('cs.report', compact('items', 'approvalFlows'));
 
     }
 

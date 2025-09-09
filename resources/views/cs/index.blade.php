@@ -170,14 +170,14 @@
                                         <td class="text-truncate" style="max-width:100px;">{{ $item->filename }}</td>
                                         <td>
                                             <div class="btn-group">
-                                                <a href="{{ route('admin.requisitions.edit', $item->id) }}"
+                                                <a href="{{ route('admin.cs.edit', $item->id) }}"
                                                     class="btn btn-primary btn-flat"><i class="fa fa-edit"></i></a>
                                                 &nbsp;&nbsp;&nbsp;
-                                                <a href="{{ route('admin.requisitions.show', $item->id) }}"
+                                                <a href="{{ route('admin.cs.show', $item->id) }}"
                                                     class="btn btn-info btn-flat"><i class="fa fa-check-circle"></i></a>
 
                                                 &nbsp;&nbsp;&nbsp;
-                                                <a href="{{ route('requisitions.report', $item->id) }}" target="_blank"
+                                                <a href="{{ route('cs.report', $item->id) }}" target="_blank"
                                                     class="btn btn-success btn-flat">
                                                     <i class="fa fa-print"></i>
                                                 </a>

@@ -111,8 +111,9 @@ Route::group(['prefix' => 'admin','as' => 'admin.','middleware' => ['auth','role
     Route::put('admin/requisitions/{id}', 'RequisitionController@update')->name('admin.requisitions.update');
 
 });
-
+//Report
 Route::get('admin/requisitions/report/{id}', 'RequisitionController@report')->name('requisitions.report');
+Route::get('admin/cs/report/{id}', 'CSController@report')->name('cs.report');
 //Data Transfer
 Route::get('admin/transferprojectinfo', 'DataTransferController@transferprojectinfo');
 Route::get('admin/transferprojectbudget', 'DataTransferController@transferprojectbudget');
