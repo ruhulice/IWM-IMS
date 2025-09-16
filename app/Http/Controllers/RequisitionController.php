@@ -57,7 +57,7 @@ class RequisitionController extends Controller
         // Build base query
         $query = DB::table('requisitioninfo as reqi')
             ->join('requisitiondetails as reqd', 'reqi.id', '=', 'reqd.requisitionid')
-            ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
+            ->join('category as c', 'reqd.categoryid', '=', 'c.id')
             ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
             ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
             ->join('division as d', 'reqi.divisionid', '=', 'd.divisionid')
@@ -388,7 +388,7 @@ class RequisitionController extends Controller
     {
         $requisitions = DB::table('requisitioninfo as reqi')
              ->join('requisitiondetails as reqd', 'reqi.id', '=', 'reqd.requisitionid')
-             ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
+             ->join('category as c', 'reqd.categoryid', '=', 'c.id')
              ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
              ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
              ->join('division as d', 'reqi.divisionid', '=', 'd.divisionid')
@@ -459,7 +459,7 @@ class RequisitionController extends Controller
     {
         $items = DB::table('requisitioninfo as reqi')
             ->join('requisitiondetails as reqd', 'reqi.id', '=', 'reqd.requisitionid')
-            ->join('catagory as c', 'reqd.categoryid', '=', 'c.id')
+            ->join('category as c', 'reqd.categoryid', '=', 'c.id')
             ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
             ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
             ->join('division as d', 'reqi.divisionid', '=', 'd.divisionid') // ✅ fixed here

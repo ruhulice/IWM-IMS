@@ -109,6 +109,8 @@ Route::group(['prefix' => 'admin','as' => 'admin.','middleware' => ['auth','role
     Route::get('/transfer-list', 'TransferController@getTransferList')->name('transfer-list');
     // Route::get('requisitions/report/{id}', 'RequisitionController@report')->name('requisitions.report');
     Route::put('admin/requisitions/{id}', 'RequisitionController@update')->name('admin.requisitions.update');
+    //ICT Budget
+    Route::resource('ictbudgets', 'ICTBudgetController');
 
 });
 //Report

@@ -51,7 +51,7 @@ class CSController extends Controller
         $query = DB::table('csinfo as c')
             ->join('csdetails as c2', 'c.id', '=', 'c2.csid')
             ->join('users as u', 'c.csby', '=', 'u.id')
-            ->join('catagory as c3', 'c.categoryid', '=', 'c3.id')
+            ->join('category as c3', 'c.categoryid', '=', 'c3.id')
             ->join('subcategory as s', 'c.subcategoryid', '=', 's.id')
             ->join('vendor as v', 'c2.vendorid', '=', 'v.id')
             ->join('division as d', 'c.divisionid', '=', 'd.divisionid')
@@ -216,7 +216,7 @@ class CSController extends Controller
     {
         $csdata = DB::table('csinfo as c')
         ->join('csdetails as cd', 'c.id', '=', 'cd.csid')
-        ->join('catagory as c2', 'c.categoryid', '=', 'c2.id')
+        ->join('category as c2', 'c.categoryid', '=', 'c2.id')
         ->join('subcategory as s', 'c.subcategoryid', '=', 's.id')
         ->join('division as d', 'c.divisionid', '=', 'd.divisionid')
         ->join('users as u', 'c.csby', '=', 'u.id')
@@ -350,7 +350,7 @@ class CSController extends Controller
 
         $items = DB::table('csinfo as c')
         ->join('csdetails as cd', 'c.id', '=', 'cd.csid')
-        ->join('catagory as c2', 'c.categoryid', '=', 'c2.id')
+        ->join('category as c2', 'c.categoryid', '=', 'c2.id')
         ->join('subcategory as s', 'c.subcategoryid', '=', 's.id')
         ->join('division as d', 'c.divisionid', '=', 'd.divisionid')
         ->join('users as u', 'c.csby', '=', 'u.id')

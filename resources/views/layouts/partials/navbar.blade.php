@@ -84,6 +84,10 @@
         <ul>
 
             <li>
+                <a class="{{ request()->is('admin/ictbudgets') ? ' active' : '' }}"
+                    href="{{ route('admin.ictbudgets.index') }}">Central ICT Budget</a>
+            </li>
+            <li>
                 <a class="{{ request()->is('admin/requisitions') ? ' active' : '' }}"
                     href="{{ route('admin.requisitions.index') }}">Memo Management</a>
             </li>
@@ -93,12 +97,9 @@
             </li>
             <li>
                 <a class="{{ request()->is('admin/comment') ? ' active' : '' }}"
-                    href="{{ route('admin.comment.index') }}">Work Order</a>
+                    href="{{ route('admin.comment.index') }}">Purchase Order (PO)</a>
             </li>
-            <li>
-                <a class="{{ request()->is('admin/comment') ? ' active' : '' }}"
-                    href="{{ route('admin.comment.index') }}">Delivery</a>
-            </li>
+
         </ul>
     </li>
     <hr>

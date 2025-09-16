@@ -98,16 +98,16 @@
             <img src="{{ asset('assets/landing/images/iwm2024.png') }}" alt="Logo">
             <h1>INSTITUTE OF WATER MODELLING</h1>
             <p>IWM BHABAN, House 06, Road 3C, Block H, Sector 15, Uttara, Dhaka 1230, Bangladesh</p>
-            <p><strong>Internal Memo</strong></p>
-            <p>Sl No. <strong>{{ $items[0]->id }}</strong></p>
+            <p><strong>Internal Memo: {{ $items[0]->id }}</strong></p>
+            {{-- <p>Sl No. <strong>{{ $items[0]->id }}</strong></p> --}}
         </div>
         <div class="content">
             <p><strong>TO: </strong>Executive Director</p>
             <p><strong>Through: </strong> DED (Operation)</p>
             <p><strong>Through: </strong> Director, {{ $items[0]->divisionname }} Division</p>
             <p><strong>From: </strong> {{ $items[0]->name }}</p>
-            <p><strong>Subject: </strong> Procuring items for <strong>{{ $items[0]->divisionname }} </strong>Division
-                from Project No: <strong>{{ $items[0]->projectno }}</strong></p>
+            <p><strong>Subject: </strong> Procuring items for {{ $items[0]->divisionname }} Division
+                from Project No: {{ $items[0]->projectno }}</p>
             <p><strong>Date: </strong> {{ \Carbon\Carbon::parse($items[0]->csdate)->format('d M Y') }}</p>
             <p><strong>Category: </strong>{{ $items[0]->categoryname }}</p>
             <p><strong>Sub-Category: </strong>{{ $items[0]->subcategoryname }}</p>
@@ -126,7 +126,7 @@
                     <th>Technical Specification</th>
                     <th>Unit Price(Approx.)</th>
                     <th>Quantity</th>
-                    <th>Price (incl. VAT & IT)</th>
+                    <th>Total Price (incl. VAT & IT)</th>
                 </tr>
             </thead>
             <tbody>
