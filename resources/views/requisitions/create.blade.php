@@ -13,7 +13,7 @@
                 <a class="breadcrumb-item" href="{{ url('/dashboard') }}">
                     <i class="fa fa-dashboard"></i> Dashboard
                 </a>
-                <span class="breadcrumb-item active">Requisition Dashboard</span>
+                <span class="breadcrumb-item active">Memo Dashboard</span>
             </nav>
         </div>
     </div>
@@ -50,7 +50,7 @@
                                             </div>
                                         </div> --}}
 
-                                        <div class="col-md-4">
+                                        {{-- <div class="col-md-4">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Division <span
                                                         style="color: red">*</span></label>
@@ -63,9 +63,9 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                        </div>
+                                        </div> --}}
 
-                                        <div class="col-md-4">
+                                        {{-- <div class="col-md-4">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Project <span
                                                         style="color: red">*</span></label>
@@ -73,14 +73,21 @@
                                                     <option value="">Select One</option>
                                                 </select>
                                             </div>
-                                        </div>
+                                        </div> --}}
 
-                                        <div class="col-md-4">
+                                        <div class="col-md-2">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Memo Date <span
                                                         style="color: red">*</span></label>
                                                 <input type="text" class="form-control" id="requisitiondate"
                                                     name="requisitiondate" value="{{ date('Y-m-d') }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Upload memo </label>
+                                                <input type="file" name="pdffile" id="pdffile"
+                                                    class="form-control-file" accept="application/pdf">
                                             </div>
                                         </div>
                                     </div>
@@ -94,15 +101,15 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    {{-- <div class="row">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label class="font-weight-bold">Upload File</label>
+                                                <label class="font-weight-bold">Upload memo </label>
                                                 <input type="file" name="pdffile" id="pdffile"
                                                     class="form-control-file" accept="application/pdf">
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> --}}
 
                                 </div>
                             </div>
@@ -120,6 +127,9 @@
                                                 <th>Category <span style="color: red">*</span></th>
                                                 <th>Sub Category <span style="color: red">*</span></th>
                                                 <th>Technical Specification <span style="color: red">*</span></th>
+                                                <th>Division<span style="color: red">*</span></th>
+                                                <th>Project <span style="color: red">*</span></th>
+                                                <th>Initial</span></th>
                                                 <th>Unit Price(Approx.) <span style="color: red">*</span></th>
                                                 <th>Quantity <span style="color: red">*</span></th>
                                                 <th>Price (With VAT & IT) <span style="color: red">*</span></th>
@@ -148,9 +158,9 @@
             orientation: "bottom left"
         });
 
-        function getDistrictListByDivCode() {
-            let division_code = $('#divisionid').val();
-            //console.log(division_code);
+        function getDistrictListByDivCode(rowId) {
+            let division_code = $('#divisionid' + rowId).val();
+            console.log(division_code);
             $.ajax({
                 type: "GET",
                 url: "/bd-district-list",
@@ -159,12 +169,18 @@
                 },
                 dataType: "json",
                 success: function(response) {
-                    //console.log(response);
-                    $('#projectno').empty().append('<option value="">Select One</option>');
-                    $.each(response, function(projectTitle, projectno) {
-                        $('#projectno').append(
-                            `<option value="${projectno}">${projectno}-${projectTitle}</option>`);
+                    $('#projectno' + rowId).empty().append('<option value="">Select One</option>');
+                    $.each(response, function(key, value) {
+                        console.log(key, value);
+                        $('#projectno' + rowId).append(
+                            `<option value="${value}">${value}-${key}</option>`);
                     });
+                    //console.log(response);
+                    // $('#projectno').empty().append('<option value="">Select One</option>');
+                    // $.each(response, function(projectTitle, projectno) {
+                    //     $('#projectno').append(
+                    //         `<option value="${projectno}">${projectno}-${projectTitle}</option>`);
+                    // });
                 }
             });
         }
@@ -208,6 +224,27 @@
                 </td>
                 <td>
                     <input type="text" class="form-control" name="techspecification[]" placeholder="Enter techspecification" required>
+                </td>
+                <td>
+                    <select class="form-control" id="divisionid${count_row}" name="divisionid[]" onchange="getDistrictListByDivCode(${count_row})" required>
+                        <option value="">Select One</option>
+                         @foreach ($divisions as $item)
+                         <option value="{{ $item->divisionid }}">{{ $item->divisionname }}</option>
+                         @endforeach
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control" id="projectno${count_row}" name="projectno[]" required>
+                    <option value="">Select One</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control" id="empinitial${count_row}" name="empinitial[]"  required>
+                        <option value="">Select One</option>
+                        @foreach ($initial as $item)
+                            <option value="{{ $item->employeeinitial }}">{{ $item->employeeinitial }}</option>
+                        @endforeach
+                    </select>
                 </td>
                 <td><input type="number" class="form-control rate-input" name="rate[]" value="1" min="0" required></td>
                 <td><input type="number" class="form-control quantity-input" name="quantity[]" value="1" min="0" required></td>

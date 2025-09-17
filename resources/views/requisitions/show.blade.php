@@ -27,10 +27,10 @@
                 </div>
                 <div class="col-md-4"><strong>Created By:</strong> {{ $requisitions[0]->name }}</div>
             </div>
-            <div class="row mt-2">
+            {{-- <div class="row mt-2">
                 <div class="col-md-4"><strong>Division:</strong> {{ $requisitions[0]->divisionname }}</div>
                 <div class="col-md-4"><strong>Project No:</strong> {{ $requisitions[0]->projectno }}</div>
-            </div>
+            </div> --}}
             <hr>
             <p><strong>Purpose of Requisition:</strong> {{ $requisitions[0]->reqpurpose }}</p>
         </div>
@@ -45,6 +45,9 @@
                             <th>Category</th>
                             <th>Subcategory</th>
                             <th>Technical Specification</th>
+                            <th>Division</th>
+                            <th>Project</th>
+                            <th>Initial</th>
                             <th>Rate(Approx.)</th>
                             <th>Quantity</th>
                             <th>UoM</th>
@@ -60,6 +63,9 @@
                                 <td>{{ $req->categoryname }}</td>
                                 <td>{{ $req->subcategoryname }}</td>
                                 <td>{{ $req->techspecification }}</td>
+                                <td>{{ $req->divisionname }}</td>
+                                <td>{{ $req->projectno }}</td>
+                                <td>{{ $req->empinitial }}</td>
                                 <td class="text-right">{{ number_format($req->rate, 2) }}</td>
                                 <td class="text-center">{{ $req->quantity }}</td>
                                 <td class="text-center">{{ $req->uom }}</td>
@@ -67,7 +73,7 @@
                             </tr>
                         @endforeach
                         <tr class="table-secondary">
-                            <td colspan="7" class="text-end"><strong>Total Amount (BDT):</strong></td>
+                            <td colspan="10" class="text-end"><strong>Total Amount (BDT):</strong></td>
                             <td class="text-right"><strong>{{ number_format($totalPrice, 2) }}</strong></td>
                         </tr>
                     </tbody>

@@ -12,15 +12,15 @@ class RequisitionDetails extends Model
 
     public $timestamps = false;
 
-   // protected $guarded = [];
-   protected $fillable = [
-        'requisitionid',
-        'categoryid',
-        'subcategoryid',
-        'techspecification',
-        'quantity',
-        'uom',
-        'rate',
-        'price',
-    ];
+    protected $guarded = [];
+    //    protected $fillable = [
+    //         'requisitionid',
+    //         'categoryid',
+    //         'subcategoryid',
+    //         'techspecification',
+    //         'quantity',
+    //         'uom',
+    //         'rate',
+    //         'price',
+    //     ];
 }

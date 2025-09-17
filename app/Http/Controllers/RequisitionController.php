@@ -7,6 +7,7 @@ use App\Models\ApprovalFlow;
 use App\Models\Category;
 use App\Models\Condition;
 use App\Models\Division;
+use App\Models\Employees;
 use App\Models\Project;
 use App\Models\SubCategory;
 use Illuminate\Http\Request;
@@ -60,7 +61,7 @@ class RequisitionController extends Controller
             ->join('category as c', 'reqd.categoryid', '=', 'c.id')
             ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
             ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
-            ->join('division as d', 'reqi.divisionid', '=', 'd.divisionid')
+            ->join('division as d', 'reqd.divisionid', '=', 'd.divisionid')
             ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
             ->select(
                 'reqi.id',
@@ -71,9 +72,10 @@ class RequisitionController extends Controller
                 'reqi.status as status_id',
                 's.status as status',
                 'reqi.reqpurpose',
-                'reqi.divisionid',
+                'reqd.divisionid',
                 'd.divisionname',
-                'reqi.projectno',
+                'reqd.projectno',
+                'reqd.empinitial',
                 'reqd.categoryid',
                 'c.categoryname',
                 'reqd.subcategoryid',
@@ -123,156 +125,240 @@ class RequisitionController extends Controller
         // dd("Create");
         $category = Category::whereIn('categoryid', ['CM','CP','CS','CE','CA'])->get();
         $divisions  = Division::all();
+        $initial = Employees::where('employmentstatusid', '=', 1)->orderBy("employeeinitial", "asc")->get();
 
         // $users      = User::select('users.*')->leftJoin('user_roles', 'users.id', '=', 'user_roles.user_id')->where('user_roles.role_id', 5)->where('users.is_active', true)->get();
 
         // return view('transfer.create', compact('subcategory','equipments', 'conditions', 'divisions', 'statues', 'users','divisions'));
         $users = User::all();
-        return view('requisitions.create', compact('users', 'category', 'divisions'));
+        return view('requisitions.create', compact('users', 'category', 'divisions', 'initial'));
     }
-
     public function store(Request $request)
     {
-        //  dd($request);
         $userid = Auth::user()->id;
+
+        // Validation
         $request->validate([
-                'requisitiondate' => 'required|date',
-                'reqpurpose' => 'nullable|string',
-                'divisionid' => 'required|integer',
-                'projectno' => 'required|string',
-                'categoryid' => 'required|array',
-                'subcategoryid' => 'required|array',
-                'techspecification' => 'required|array',
-                'quantity' => 'required|array',
-                'rate' => 'required|array',
-                'price' => 'required|array',
-            ]);
-        // Validate file
-        $request->validate([
-            'pdffile' => 'required|mimes:pdf,msg|max:20480' // max 20MB
+            'requisitiondate'   => 'required|date',
+            'reqpurpose'        => 'nullable|string',
+            'divisionid'        => 'required|array',
+            'projectno'         => 'required|array',
+            'categoryid'        => 'required|array',
+            'subcategoryid'     => 'required|array',
+            'techspecification' => 'required|array',
+            'quantity'          => 'required|array',
+            'rate'              => 'required|array',
+            'price'             => 'required|array',
+            'empinitial'        => 'nullable|array',
+            'pdffile'           => 'nullable|mimes:pdf,msg|max:20480',
         ]);
-
-
 
         try {
             DB::transaction(function () use ($request, $userid) {
+
                 // Insert into master
                 $requisition = RequisitionInfo::create([
                     'requisitiondate' => $request->requisitiondate,
-                    'requisitionby' => $userid,
-                    'divisionid' => $request->divisionid,
-                    'projectno' => $request->projectno,
-                    'status' => 1,
-                    'totalamount' => 0,
-                    'reqpurpose' => $request->reqpurpose,
-                    'created_at' => Carbon::now(),
+                    'requisitionby'   => $userid,
+                    'status'          => 1,
+                    'totalamount'     => 0, // will update later
+                    'reqpurpose'      => $request->reqpurpose,
+                    'created_at'      => now(),
                 ]);
+
+                $totalAmount = 0;
 
                 // Insert into child table
                 foreach ($request->categoryid as $key => $value) {
-                    $data = [
+                    $price = $request->price[$key] ?? 0;
+                    $totalAmount += $price;
+
+                    RequisitionDetails::create([
                         'requisitionid'     => $requisition->id,
                         'categoryid'        => $request->categoryid[$key],
                         'subcategoryid'     => $request->subcategoryid[$key],
                         'techspecification' => $request->techspecification[$key],
+                        'divisionid'        => $request->divisionid[$key],
+                        'projectno'         => $request->projectno[$key],
+                        'empinitial'        => $request->empinitial[$key] ?? null,
                         'quantity'          => $request->quantity[$key],
-                        'uom'               => 'PCs',
+                        'uom'               => 'Nos.',
                         'rate'              => $request->rate[$key],
-                        'price'             => $request->price[$key],
-                    ];
-                    RequisitionDetails::create($data);
+                        'price'             => $price,
+                        'created_at'        => now(),
+                    ]);
                 }
-                // Approval Flow
 
-                $appflow = new ApprovalFlow();
-                $appflow->documenttypeid = 1;
-                $appflow->documentid = $requisition->id;
-                $appflow->projectno = $requisition->projectno;
-                $appflow->submitdate = Carbon::now()->toDateString();
-                $appflow->statusid = 1;
-                $appflow->approvalpathid = 1;
-                $appflow->fromauthorid =  $userid;
-                $appflow->toauthorid = 3;
-                $appflow->comments = "";
-                $appflow->iscurrentflow = true;
+                // Update total amount in master
+                $requisition->update(['totalamount' => $totalAmount]);
 
-                $appflow->save();
+                // Create approval flow
+                $appflow = ApprovalFlow::create([
+                    'documenttypeid'   => 1,
+                    'documentid'       => $requisition->id,
+                    'projectno'        => $request->projectno[0] ?? null,
+                    'submitdate'       => now()->toDateString(),
+                    'statusid'         => 1,
+                    'approvalpathid'   => 1,
+                    'fromauthorid'     => $userid,
+                    'toauthorid'       => 3,
+                    'comments'         => '',
+                    'iscurrentflow'    => true,
+                ]);
 
-                // Save file data and storage PDF/MSG
+                // Handle file upload
                 if ($request->hasFile('pdffile')) {
                     $file = $request->file('pdffile');
-
                     if ($file->isValid()) {
-                        // Allowed extensions
-                        $allowedExtensions = ['pdf', 'msg'];
-
-                        // Get file extension
-                        $extension = strtolower($file->getClientOriginalExtension());
-
-                        if (!in_array($extension, $allowedExtensions)) {
-                            return back()->with('error', 'Only PDF and MSG files are allowed.');
-                        }
-
-                        // Unique file name
                         $fileName = time() . '_' . $file->getClientOriginalName();
-
-                        // Store in storage/app/public/uploads
                         $filePath = $file->storeAs('public/pdfs', $fileName);
-                        //$filePath = $file->storeAs('public/uploads', $fileName);
 
-                        // Save path to database
-                        $document = new Uploaddocuments();
-                        $document->name = $fileName;
-                        $document->path = str_replace('public/', '', $filePath);
-                        $document->documenttype = 1; //($extension === 'pdf') ? 1 : 2; // 1=PDF, 2=MSG
-                        $document->documentid = $requisition->id;
-                        $document->uploadby = $request->requisitionby;
-                        $document->uploaddate = Carbon::now();
-                        $document->save();
-
+                        Uploaddocuments::create([
+                            'name'         => $fileName,
+                            'path'         => str_replace('public/', '', $filePath),
+                            'documenttype' => 1, // 1=PDF, 2=MSG
+                            'documentid'   => $requisition->id,
+                            'uploadby'     => $userid,
+                            'uploaddate'   => now(),
+                        ]);
                     } else {
-                        return back()->with('error', 'Uploaded file is not valid.');
+                        throw new \Exception('Uploaded file is not valid.');
                     }
                 }
-
-                // // Save file data and storage PDF
-                // if ($request->hasFile('pdffile')) {
-                //     $file = $request->file('pdffile');
-                //     // dd($file);
-
-                //     if ($file->isValid()) {
-                //         $fileName = time() . '_' . $file->getClientOriginalName();
-                //         //dd($fileName);
-                //         // Save to storage/app/public/pdfs
-                //         $filePath = $file->storeAs('public/pdfs', $fileName);
-
-                //         // Save path to database
-                //         $document = new Uploaddocuments();
-                //         $document->name = $fileName;
-                //         $document->path = str_replace('public/', '', $filePath);
-                //         $document->documenttype = 1;
-                //         $document->documentid = $requisition->id;
-                //         $document->uploadby = $request->requisitionby;
-                //         $document->uploaddate = Carbon::now();
-                //         $document->save();
-                //     } else {
-                //         return back()->with('error', 'Uploaded file is not valid.');
-                //     }
-                // }
             });
 
-
-
             return redirect()->route('admin.requisitions.index')
-                            ->with('success', 'Requisition created successfully.');
-        } catch (\Exception $e) {
-            //dd($e->getMessage());
-            Log::error('Requisition creation failed: ' . $e->getMessage());
+                             ->with('success', 'Requisition created successfully.');
 
+        } catch (\Exception $e) {
+            Log::error('Requisition creation failed: ' . $e->getMessage());
             return back()->with('error', 'Failed to save requisition: ' . $e->getMessage());
         }
-
     }
+
+
+    // public function store(Request $request)
+    // {
+    //     // dd($request);
+    //     $userid = Auth::user()->id;
+
+    //     $request->validate([
+    //     'requisitiondate' => 'required|date',
+    //     'reqpurpose'      => 'nullable|string',
+    //     'divisionid'      => 'required|array',
+    //     'projectno'       => 'required|array',
+    //     'categoryid'      => 'required|array',
+    //     'subcategoryid'   => 'required|array',
+    //     'techspecification' => 'required|array',
+    //     'quantity'        => 'required|array',
+    //     'rate'            => 'required|array',
+    //     'price'           => 'required|array',
+    //     'empinitial'      => 'nullable|array',
+    //     'pdffile'         => 'nullable|mimes:pdf,msg|max:20480', // max 20MB
+    //      ]);
+
+
+
+    //     try {
+    //         DB::transaction(function () use ($request, $userid) {
+    //             // Insert into master
+    //             $requisition = RequisitionInfo::create([
+    //                 'requisitiondate' => $request->requisitiondate,
+    //                 'requisitionby' => $userid,
+    //                 'status' => 1,
+    //                 'totalamount' => 0,
+    //                 'reqpurpose' => $request->reqpurpose,
+    //                 'created_at' => Carbon::now(),
+    //             ]);
+
+    //              $totalAmount = 0;
+
+    //                // Insert into child table
+    //             foreach ($request->categoryid as $key => $value) {
+    //                 $price = $request->price[$key] ?? 0;
+    //                 $totalAmount += $price;
+
+    //                 RequisitionDetails::create([
+    //                     'requisitionid'     => $requisition->id,
+    //                     'categoryid'        => $request->categoryid[$key],
+    //                     'subcategoryid'     => $request->subcategoryid[$key],
+    //                     'techspecification' => $request->techspecification[$key],
+    //                     'divisionid'        => $request->divisionid[$key],
+    //                     'projectno'         => $request->projectno[$key],
+    //                     'empinitial'        => $request->empinitial[$key] ?? null,
+    //                     'quantity'          => $request->quantity[$key],
+    //                     'uom'               => 'Nos.',
+    //                     'rate'              => $request->rate[$key],
+    //                     'price'             => $price,
+    //                     'created_at'        => Carbon::now(),
+    //                 ]);
+
+    //             $appflow = new ApprovalFlow();
+    //             $appflow->documenttypeid = 1;
+    //             $appflow->documentid = $requisition->id;
+    //             $appflow->projectno = $requisition->projectno;
+    //             $appflow->submitdate = Carbon::now()->toDateString();
+    //             $appflow->statusid = 1;
+    //             $appflow->approvalpathid = 1;
+    //             $appflow->fromauthorid =  $userid;
+    //             $appflow->toauthorid = 3;
+    //             $appflow->comments = "";
+    //             $appflow->iscurrentflow = true;
+
+    //             $appflow->save();
+
+    //             // Save file data and storage PDF/MSG
+    //             if ($request->hasFile('pdffile')) {
+    //                 $file = $request->file('pdffile');
+
+    //                 if ($file->isValid()) {
+    //                     // Allowed extensions
+    //                     $allowedExtensions = ['pdf', 'msg'];
+
+    //                     // Get file extension
+    //                     $extension = strtolower($file->getClientOriginalExtension());
+
+    //                     if (!in_array($extension, $allowedExtensions)) {
+    //                         return back()->with('error', 'Only PDF and MSG files are allowed.');
+    //                     }
+
+    //                     // Unique file name
+    //                     $fileName = time() . '_' . $file->getClientOriginalName();
+
+    //                     // Store in storage/app/public/uploads
+    //                     $filePath = $file->storeAs('public/pdfs', $fileName);
+    //                     //$filePath = $file->storeAs('public/uploads', $fileName);
+
+    //                     // Save path to database
+    //                     $document = new Uploaddocuments();
+    //                     $document->name = $fileName;
+    //                     $document->path = str_replace('public/', '', $filePath);
+    //                     $document->documenttype = 1; //($extension === 'pdf') ? 1 : 2; // 1=PDF, 2=MSG
+    //                     $document->documentid = $requisition->id;
+    //                     $document->uploadby = $request->requisitionby;
+    //                     $document->uploaddate = Carbon::now();
+    //                     $document->save();
+
+    //                 } else {
+    //                     return back()->with('error', 'Uploaded file is not valid.');
+    //                 }
+    //             }
+
+
+    //         });
+
+
+
+    //         return redirect()->route('admin.requisitions.index')
+    //                         ->with('success', 'Requisition created successfully.');
+    //     } catch (\Exception $e) {
+    //         //dd($e->getMessage());
+    //         Log::error('Requisition creation failed: ' . $e->getMessage());
+
+    //         return back()->with('error', 'Failed to save requisition: ' . $e->getMessage());
+    //     }
+
+    // }
 
     public function edit($id)
     {
@@ -391,19 +477,21 @@ class RequisitionController extends Controller
              ->join('category as c', 'reqd.categoryid', '=', 'c.id')
              ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
              ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
-             ->join('division as d', 'reqi.divisionid', '=', 'd.divisionid')
+             ->join('division as d', 'reqd.divisionid', '=', 'd.divisionid')
              ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
              ->select(
                  'reqi.id',
                  'reqi.requisitionby',
                  'u.name',
+                 'u.user_name',
                  'reqi.requisitiondate',
                  'reqi.status as status_id',
                  's.status as status',
                  'reqi.reqpurpose',
-                 'reqi.divisionid',
+                 'reqd.divisionid',
                  'd.divisionname',
-                 'reqi.projectno',
+                 'reqd.projectno',
+                 'reqd.empinitial',
                  'reqd.categoryid',
                  'c.categoryname',
                  'reqd.subcategoryid',
@@ -462,19 +550,21 @@ class RequisitionController extends Controller
             ->join('category as c', 'reqd.categoryid', '=', 'c.id')
             ->join('subcategory as sc', 'reqd.subcategoryid', '=', 'sc.id')
             ->join('users as u', 'reqi.requisitionby', '=', 'u.id')
-            ->join('division as d', 'reqi.divisionid', '=', 'd.divisionid') // ✅ fixed here
+            ->join('division as d', 'reqd.divisionid', '=', 'd.divisionid') // ✅ fixed here
             ->join('statuses as s', DB::raw('CAST(reqi.status AS INTEGER)'), '=', 's.id')
             ->select(
                 'reqi.id',
                 'reqi.requisitionby',
                 'u.name',
+                'u.user_name',
                 'reqi.requisitiondate',
                 'reqi.status as status_id',
                 's.status as status',
                 'reqi.reqpurpose',
-                'reqi.divisionid',
+                'reqd.divisionid',
                 'd.divisionname',
-                'reqi.projectno',
+                'reqd.projectno',
+                'reqd.empinitial',
                 'reqd.categoryid',
                 'c.categoryname',
                 'reqd.subcategoryid',

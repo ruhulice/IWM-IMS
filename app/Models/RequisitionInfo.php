@@ -8,19 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class RequisitionInfo extends Model
 {
     use HasFactory;
-   protected $table = 'requisitioninfo';
+    protected $table = 'requisitioninfo';
 
     public $timestamps = false;
 
-    //protected $guarded = [];
-    protected $fillable = [
-        'requisitiondate',
-        'requisitionby',
-        'status',
-        'divisionid',
-        'projectno',
-        'totalamount',
-        'reqpurpose',
-        'created_at'
-    ];
+    protected $guarded = [];
+    // protected $fillable = [
+    //     'requisitiondate',
+    //     'requisitionby',
+    //     'status',
+    //     'divisionid',
+    //     'projectno',
+    //     'totalamount',
+    //     'reqpurpose',
+    //     'created_at'
+    // ];
 }

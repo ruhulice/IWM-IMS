@@ -141,6 +141,7 @@
                                     <th>Status</th>
                                     <th>Division</th>
                                     <th>Project</th>
+                                    <th>Initial</th>
                                     <th>Rate(Approx.)</th>
                                     <th>Quantity</th>
                                     <th>UOM</th>
@@ -162,6 +163,7 @@
                                         <td class="text-truncate" style="max-width:20px;">{{ $item->status }}</td>
                                         <td class="text-truncate" style="max-width:20px;">{{ $item->divisionname }}</td>
                                         <td class="text-truncate" style="max-width:20px;">{{ $item->projectno }}</td>
+                                        <td>{{ $item->empinitial }}</td>
                                         <td>{{ $item->rate }}</td>
                                         <td>{{ $item->quantity }}</td>
                                         <td>{{ $item->uom }}</td>

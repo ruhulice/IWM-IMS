@@ -105,9 +105,8 @@
             <p><strong>TO: </strong>Executive Director</p>
             <p><strong>Through:</strong> DED (Operation)</p>
             <p><strong>Through:</strong> Director, {{ $items[0]->divisionname }} Division</p>
-            <p><strong>From:</strong> {{ $items[0]->name }}</p>
-            <p><strong>Subject:</strong> Procuring items for <strong>{{ $items[0]->divisionname }} </strong>Division
-                from Project No: <strong>{{ $items[0]->projectno }}</strong></p>
+            <p><strong>From:</strong>{{ $items[0]->name }} ({{ $items[0]->user_name }})</p>
+            <p><strong>Subject:</strong> Procuring items under ICT Systems.</p>
             <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($items[0]->requisitiondate)->format('d M Y') }}</p>
             <br>
             <hr>
@@ -123,6 +122,9 @@
                     <th>Category</th>
                     <th>Sub Category</th>
                     <th>Technical Specification</th>
+                    <th>Division</th>
+                    <th>Project</th>
+                    <th>Initial</th>
                     <th>Unit Price(Approx.)</th>
                     <th>Quantity</th>
                     <th>Price (incl. VAT & IT)</th>
@@ -137,13 +139,16 @@
                         <td>{{ $item->categoryname }}</td>
                         <td>{{ $item->subcategoryname }}</td>
                         <td>{{ $item->techspecification }}</td>
+                        <td>{{ $item->divisionname }}</td>
+                        <td>{{ $item->projectno }}</td>
+                        <td>{{ $item->empinitial }}</td>
                         <td>{{ number_format($item->rate, 2) }}</td>
                         <td>{{ $item->quantity }}</td>
                         <td>{{ number_format($item->price, 2) }}</td>
                     </tr>
                 @endforeach
                 <tr class="total-row">
-                    <td colspan="6" style="text-align: right;">Total Amount (BDT):</td>
+                    <td colspan="9" style="text-align: right;">Total Amount (BDT):</td>
                     <td>{{ number_format($totalPrice, 2) }}</td>
                 </tr>
             </tbody>
